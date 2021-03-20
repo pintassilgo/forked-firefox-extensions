@@ -1,0 +1,447 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="iframe.css">
+    <title>About</title>
+  </head>
+  <body>
+
+    <nav>
+      <a href="#changelog">Changelog</a>
+      <a href="#credits">Credits</a>
+    </nav>
+
+    <article>
+
+    <h2 id="changelog">Changelog</h2>
+    <dl class="about">
+
+      <dt>2.19</dt>
+        <dd>Fixed pop-up not matching hostname with port</dd>
+        <dd>Added support for <code>exportFunction()</code> and <code>cloneInto()</code></dd>
+        <dd>Improved auto-update process</dd>
+        <dd>Added option to add custom <code>extraKeys</code> to CodeMirror editor</dd>
+        <dd>Added CodeMirror <code>match-highlighter</code> addon (off by default)</dd>
+        <dd>New script/CSS starts enabled</dd>
+        <dd>Enable/Disable updates Option page if open</dd>
+        <dd>Added date to export folder</dd>
+        <dd>Rewrote Multi-selection for enable/delete/export</dd>
+        <dd>Changed Pin Menu default to pinned</dd>
+        <dd>Added <i>nl</i> locale <i>(by Heimen Stoffels/Vistaus)</i></dd>
+        <dd>Added Web Install option for <i>sleazyfork.org</i></dd>
+        <dd>Upgraded CodeMirror to 5.59.4</dd>
+        <dd>Upgraded <i>jQuery</i> library to 3.6.0</dd>
+        <dd>Code Improvement</dd>
+
+      <dt>2.18</dt>
+        <dd>Updated Toolbar Pop-up Style for Android</dd>
+        <dd>Updated popup width in overflow menu</dd>
+        <dd>Fixed option page script load order (new script/CSS from popup)</dd>
+
+      <dt>2.17</dt>
+        <dd>Fixed an issue with hashed URLs and Tab script list in Toolbar Pop-up</dd>
+        <dd>Reverted overflow menu CSS (from 2.8) (bug 1373490)</dd>
+
+      <dt>2.16</dt>
+        <dd>Fixed an issue with delete script (from 2.14)</dd>
+
+      <dt>2.15</dt>
+        <dd>Added <code>unsafeWindow</code> in <code>page</code> mode for <i>ViolentMonkey</i> compatibility</dd>
+        <dd>Added <code>GM info</code> in <code>page</code> mode for <i>TamperMonkey</i> & <i>ViolentMonkey</i> compatibility</dd>
+        <dd>Added <code>inject-into</code> to Toolbar Pop-up script Info</dd>
+        <dd>Added <code>run-at</code> to Toolbar Pop-up script Info</dd>
+
+      <dt>2.14</dt>
+        <dd>Improved <code>@inject-into</code> page security</dd>
+        <dd>Marked <i>page-context</i> in Debugger</dd>
+        <dd>Added option to pin the drop-down menu</dd>
+        <dd>Added error logging to <code>addStyle</code> & <code>addScript</code></dd>
+        <dd>Added frame count to toolbar popup</dd>
+        <dd>Removed RegEx <code>throw</code> details</dd>
+        <dd>Set <code>addScript</code> to remove the node after injection</dd>
+        <dd>Code Improvement</dd>
+
+      <dt>2.13</dt>
+        <dd>Added <code>@inject-into</code> Metadata support</dd>
+        <dd>Layout updates in preparation for Firefox for Android</dd>
+
+      <dt>2.12</dt>
+        <dd>Experimental preparation for Firefox for Android</dd>
+        <dd>Fixed user-script debugger display (from 2.11)</dd>
+
+      <dt>2.11</dt>
+        <dd>Fixed an error when creating a new script in a new installation (from 2.1)</dd>
+        <dd>Regex check code improvement</dd>
+
+      <dt>2.10</dt>
+        <dd>Added <code>size</code> to Toolbar Pop-up script Info</dd>
+        <dd>Upgraded CodeMirror to 5.59.1</dd>
+        <dd>Clicking the Script/CSS name on toolbar popup displays the info</dd>
+
+      <dt>2.9</dt>
+        <dd>Fixed a CSS bug in v2.8 that prevented editing in the editor</dd>
+        <dd>Upgraded <i>underscore</i> library to 1.12.0</dd>
+
+      <dt>2.8</dt>
+        <dd>Resizeable left panel to view long names</dd>
+        <dd>Fixed popup width in overflow menu</dd>
+        <dd>Complete Light/Dark Theme</dd>
+        <dd>Added <code>data-src</code> to the style injected via <code>GM_addStyle</code></dd>
+        <dd>Added <code>data-src</code> to the script injected via <code>GM_addScript</code></dd>
+        <dd>Fixed a bug when changing from UserStyle to UserCSS</dd>
+        <dd>Improved lint messages</dd>
+
+      <dt>2.7</dt>
+        <dd>Added Color Indicator & Color Picker to CSS colors</dd>
+        <dd>Added <code>include/exclude</code> to Match Pattern converter</dd>
+        <dd>Fixed a bug in active script not showing in the popup</dd>
+
+      <dt>2.6</dt>
+        <dd>Fixed a bug getting enabled/auto-update values on save script</dd>
+        <dd>Added all CodeMirror Themes</dd>
+
+      <dt>2.5</dt>
+        <dd>Change of <code>include/exclude</code> processing to <code>includeGlobs/excludeGlobs</code></dd>
+        <dd>Added Regular Expression processing for <code>include/exclude</code></dd>
+        <dd>Added warning for <code>@antifeature</code></dd>
+        <dd>Fixed an issue when deleting scripts</dd>
+        <dd>Fixed an import error in <i>Locale Maker</i></dd>
+        <dd>Added debug details to display on Developer Tools</dd>
+        <dd>Register error no longer disabled the script/CSS</dd>
+        <dd>Error marked Script/CSS in the toolbar popup can be re-enabled</dd>
+        <dd>Fixed long line display issue in the editor</dd>
+        <dd>Added more data to <code>GM.info</code></dd>
+        <dd>Updated <i>zh_CN</i> locale <i>(by linsui)</i></dd>
+
+      <dt>2.4</dt>
+        <dd>Updated Custom CodeMirror format & scope</dd>
+        <dd>Fixed an issue with Custom CSS</dd>
+
+      <dt>2.3</dt>
+        <dd>Fixed an issue with custom CodeMirrior lint option</dd>
+
+      <dt>2.2</dt>
+        <dd>Fixed a typo</dd>
+
+      <dt>2.1</dt>
+        <dd>Fixed an issue with save Template</dd>
+        <dd>Fixed an issue with save new script</dd>
+        <dd>New script will be inserted in alphabetical order in the left menu</dd>
+        <dd>Added option to customize Options page & CodeMirror style configuration</dd>
+        <dd>Added option to customize CodeMirror, addons & JavaScript lint configuration</dd>
+
+      <dt>2.0</dt>
+        <dd>Added Locale Maker</dd>
+        <dd>Added CodeMirror Editor</dd>
+        <dd>Added many CodeMirror addons</dd>
+        <dd>Added CodeMirror Themes</dd>
+        <dd>Added Statistic Info to Script & CSS</dd>
+        <dd>Added CodeMirror Lint JavaScript, CSS</dd>
+        <dd>Added Custom FireMonkey Lint & Hint</dd>
+        <dd>Added Lint Report</dd>
+        <dd>Added partial compatibility with <code>GM_getValue|GM_listValues</code></dd>
+        <dd>Changed default UserCSS insertion to <code>document-start</code></dd>
+        <dd>Added <code>@antifeature</code> support</dd>
+        <dd>Added Web Install option for styles from <i>userstyles.org</i></dd>
+        <dd>Added Auto-update for Stylish <code>CSS</code> and <code>.user.js</code></dd>
+        <dd>Added "Find scripts for this site"</dd>
+        <dd>Added Tabs to Spaces</dd>
+        <dd>Added Trim Trailing Spaces</dd>
+        <dd>Added Selection to Uppercase</dd>
+        <dd>Added Selection to Lowercase</dd>
+        <dd>Added log size control</dd>
+        <dd>Added more info to Log</dd>
+        <dd>Fixed <code>unsafeWindow</code> bug (from 1.45)</dd>
+        <dd>Added <code>name</code> & <code>description</code> localization</dd>
+        <dd>Added new line conversion in Export on Windows</dd>
+        <dd>Upgraded <i>Bootstrap</i> library to 4.5.3</dd>
+        <dd>Upgraded <i>moment</i> library to 2.29.1</dd>
+        <dd>Updated code to ES6 modules</dd>
+
+
+      <dt>1.47</dt>
+        <dd>Fixed an issue with <code>GM_addStyle()</code></dd>
+        <dd>Reverted back to async <code>GM_getValue/GM_listValues</code> due to errors</dd>
+        <dd>Added more info to Log</dd>
+
+      <dt>1.46</dt>
+        <dd>Fixed an issue when GM API is also defined in the userScript e.g. <code>GM_addStyle()</code></dd>
+
+      <dt>1.45</dt>
+        <dd>Added new script installations to the log</dd>
+        <dd>Added new GM <code>addScript</code> API</dd>
+        <dd>Added new GM <code>popup</code> API</dd>
+        <dd>Added separate CSS & JS insertion in Scratchpad</dd>
+        <dd>Added undo CSS in Scratchpad</dd>
+        <dd>Added more info to Log</dd>
+        <dd>Fixed an issue with <code>getResourceText()</code></dd>
+        <dd>Added quasi-synchronous <code>GM_getValue</code></dd>
+        <dd>Added quasi-synchronous <code>GM_listValues</code></dd>
+
+
+      <dt>1.44</dt>
+        <dd>New live Log adds new entries while log is open</dd>
+        <dd>Code Improvement</dd>
+
+      <dt>1.43</dt>
+        <dd>Added Scratchpad to temporarily insert CSS & JavaScript</dd>
+        <dd>Added Log to display latest error & script update messages</dd>
+        <dd>Changed background console.log messages to Log display</dd>
+        <dd>Code Improvement (Save settings, Register)</dd>
+
+      <dt>1.42</dt>
+        <dd>Updated Stylus Import</dd>
+        <dd>Updated zh_CN</dd>
+
+      <dt>1.41</dt>
+        <dd>Fixed an error with new format of Stylus exported json</dd>
+
+      <dt>1.40</dt>
+        <dd>Fixed a directory issue when exporting all scripts</dd>
+
+      <dt>1.39</dt>
+        <dd>Fixed an error when saving Template with Syntax Highlighting disabled</dd>
+        <dd>Saving Template will only trim the start</dd>
+        <dd>Upgraded <i>Bootstrap</i> library to 4.5.2</dd>
+        <dd>Upgraded <i>moment</i> library to 2.29.0</dd>
+        <dd>Upgraded <i>underscore</i> library to 1.11.0</dd>
+
+      <dt>1.38</dt>
+        <dd>Fixed an error in Import script</dd>
+
+      <dt>1.37</dt>
+        <dd>Added Option to disable script Counter</dd>
+        <dd>Fixed an <code>@include</code> to <code>@match</code> conversion error</dd>
+        <dd>Updated Stylus Import due to support of Stylus Style UserStyle</dd>
+        <dd>Updated <i>Script Commands</i> Interface from <code>registerMenuCommand</code></dd>
+        <dd>Added <i>New UserScript</i> & <i>New UserCSS</i> to toolbar contextmenu</dd>
+        <dd>Added <code>updateURL</code> to Toolbar Pop-up script Info</dd>
+        <dd>Fixed a Toolbar Pop-up display alignment issue with long script names</dd>
+        <dd>Upgraded <i>moment</i> Library to 2.27.0</dd>
+        <dd>Upgraded <i>underscore</i> Library to 1.10.2</dd>
+        <dd>OOP Code Improvement</dd>
+
+      <dt>1.36</dt>
+        <dd>Allowed same version local file update</dd>
+        <dd>Added proper matching of console report line numbers to script line numbers</dd>
+        <dd>Added options object processing to GM notification</dd>
+        <dd>Added image support to GM notification</dd>
+        <dd>Toolbar Icon mouse-over shows active scripts</dd>
+        <dd>Remove disallowed characters from file-names when saving</dd>
+        <dd>Minor changes to Library shorthand</dd>
+        <dd>Upgraded <i>jQuery</i> library to 3.5.1</dd>
+        <dd>OOP Code Improvement</dd>
+
+      <dt>1.35</dt>
+        <dd>Fixed a typo in <code>@resource</code> processing code (from 1.27)</dd>
+        <dd>Added <code>@inlcude</code> to <code>@match</code> conversion for <code>.co*.*</code></dd>
+
+      <dt>1.34</dt>
+        <dd>Improved Syntax Highlight rendering</dd>
+        <dd>Added Stylus Style UserStyle handler (but no regexp())</dd>
+        <dd>Added Web Install option for <code>*.user.css</code> from <i>greasyfork.org</i></dd>
+        <dd>Added Direct Install option for files loaded into tab ending in <code>*.user.css</code></dd>
+        <dd>Fixed an issue with importing userMatches/userExcludeMatches when importing script</dd>
+        <dd>Fixed Global Script Exclude Matches applying to both Script & CSS</dd>
+        <dd>Added counter at the bottom of Script & CSS</dd>
+        <dd>Added update version checking via <code>.meta.css</code></dd>
+        <dd>Fixed and issue with GM getValue/listValues (from 1.27)</dd>
+        <dd>Code Improvement</dd>
+
+      <dt>1.33</dt>
+        <dd>Fixed an issue with Global Script Exclude Matches</dd>
+
+      <dt>1.32</dt>
+        <dd>Fixed an issue with Global Script Exclude Matches</dd>
+
+      <dt>1.31</dt>
+        <dd>Improved Syntax Highlight rendering speed & style</dd>
+        <dd>Added Dark Theme to the script code section & popup (saved locally)</dd>
+        <dd>Changed the Disable Syntax process (now saved locally)</dd>
+        <dd>Added '.user' to file-names in export for compatibility with other manager</dd>
+        <dd>Fixed an issue in conversion process with <code>file:///</code> (from 1.29)</dd>
+        <dd>Fixed an issue with User Matches & User Exclude Matches</dd>
+        <dd>Added the same <code>@require</code> features of UserScript, to UserCSS as well</dd>
+
+      <dt>1.30</dt>
+        <dd>Fixed an encoding issue with Export function</dd>
+        <dd>Fixed a typo in <code>&lt;all_urls&gt;</code> processing</dd>
+
+      <dt>1.29</dt>
+        <dd>Fixed an issue with same-name command by different scripts on GM <code>registerMenuCommand</code></dd>
+        <dd>Changed GM <code>registerMenuCommand</code> process since it did not work in private window (bug 1329304)</dd>
+        <dd>Added GM <code>unregisterMenuCommand</code></dd>
+        <dd>Added GM <code>addValueChangeListener</code></dd>
+        <dd>Added GM <code>removeValueChangeListener</code></dd>
+        <dd>Added GM <code>download</code></dd>
+        <dd>Added <code>browser</code> to GM <code>info</code></dd>
+        <dd>Added <code>platform</code> to GM <code>info</code></dd>
+        <dd>Added more <code>@include</code> to <code>@match</code> conversion processes</dd>
+        <dd>Fixed an error with Auto-Update</dd>
+        <dd>Toolbar Icon Badge now counts the active scripts</dd>
+        <dd>Added sticky navigation and submenus to Help</dd>
+
+      <dt>1.28</dt>
+        <dd>Added GM <code>log</code></dd>
+        <dd>Fixed an issue with sync</dd>
+
+      <dt>1.27</dt>
+        <dd>Added Storage Sync option</dd>
+        <dd>Added remote <code>@require</code> processing <i>(experimental)</i></dd>
+        <dd>Added <code>@resource</code> processing</dd>
+        <dd>Added GM <code>getResourceText</code></dd>
+        <dd>Added GM <code>getResourceUrl</code></dd>
+        <dd>Added GM <code>registerMenuCommand</code></dd>
+        <dd>Added Direct Install option for files loaded into tab ending in <code>*.user.js</code></dd>
+        <dd>Work-around for <code>https://raw.githubusercontent.com/*/*.user.js</code> using <code>cdn.jsdelivr.net</code> mirror (bug 1411641)</dd>
+        <dd>Fixed an error in <code>@noframes</code> processing</dd>
+        <dd>Added resources to GM <code>info</code> response</dd>
+        <dd>Added Help to toolbar contextmenu</dd>
+        <dd>Added <code>@require</code> parsing to include <ibootstrapp.js</i> from included library</dd>
+        <dd>Added <code>@require</code> parsing to include <i>moment.js</i> from included library</dd>
+        <dd>Added <code>@require</code> parsing to include <i>underscore.js</i> from included library</dd>
+        <dd>Added <code>@require</code> parsing to ignore <i>gm4-polyfill..js</i> as it is not applicable</dd>
+        <dd>Added case <i>ajax.aspnetcdn.com</i> to processed URLs</dd>
+        <dd>Added case <i>cdn.staticfile.org</i> to processed URLs</dd>
+        <dd>Added case <i>pagecdn.io</i> to processed URLs</dd>
+        <dd>Added case <i>apps.bdimg.com</i> to processed URLs</dd>
+        <dd>Added case <i>libs.baidu.com</i> to processed URLs</dd>
+        <dd>Added case <i>lib.baomitu.com</i> to processed URLs</dd>
+
+     <dt>1.26</dt>
+        <dd>Added update version checking via <code>.meta.js</code></dd>
+        <dd>Added Web Install option for <i>openuserjs.org</i></dd>
+        <dd>Fixed an error with Web Install & User Matches & User Exclude Matches</dd>
+
+      <dt>1.25</dt>
+        <dd>Added a fix for bad protocol wildcard in <code>@include</code></dd>
+        <dd>Added TLD wildcard for <code>@matches</code></dd>
+        <dd>Added <code>@exclude-match</code> processing</dd>
+        <dd>Added persistent User Matches & User Exclude Matches</dd>
+        <dd>Added Global Script Exclude Matches</dd>
+        <dd>Minimum version increased to Firefox 68 (released 2019-07-09, official release of userScript API)</dd>
+
+      <dt>1.24</dt>
+        <dd>Fixed a XMLHttpRequest returning <i>null</i></dd>
+        <dd>Fixed a layout issue when syntax highlighting is disabled</dd>
+        <dd>Added <code>@require</code> parsing to include <i>jQuery1/2/3</i> & <i>jQuery UI</i> from included library</dd>
+        <dd>Added GM <code>addStyle</code></dd>
+        <dd>Added <code>@noframes</code> processing</dd>
+        <dd>Added <code>unsafeWindow</code> support</dd>
+
+      <dt>1.23</dt>
+        <dd>Added <code>@require</code> to enable requiring other saved scripts</dd>
+
+      <dt>1.22</dt>
+        <dd>Added Help button to toolbar pop-up</dd>
+        <dd>Fixed a bug with Disable Syntax Highlighting</dd>
+
+      <dt>1.21</dt>
+        <dd>Fixed a bug in saving new Script/CSS</dd>
+
+      <dt>1.20</dt>
+        <dd>Fixed an update bug with edited script from GreasyFork</dd>
+        <dd>Workaround for Webextension UUID leak via Fetch requests (https://bugzilla.mozilla.org/show_bug.cgi?id=1405971)</dd>
+
+      <dt>1.19</dt>
+        <dd>Added Web Install option for <i>greasyfork.org</i></dd>
+        <dd>Added Direct Install option for files loaded into tab for <code>https://greasyfork.org/scripts/*.user.js</code> & <code>file:///*/*.user.js</code></dd>
+        <dd><i>@downloadURL/@installURL</i>, if present, will be used for Script/CSS update.</dd>
+
+      <dt>1.18</dt>
+        <dd>Added feature to modify 'Cookie', 'Host', 'Origin', 'Referer' forbidden headers (requires webRequest & webRequestBlocking permission)</dd>
+
+      <dt>1.17</dt>
+        <dd>Added option to disable Syntax Highlighting</dd>
+
+      <dt>1.16</dt>
+        <dd>Added GM <i>info</i> support</dd>
+
+      <dt>1.15</dt>
+        <dd>Added a workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1583159</dd>
+
+      <dt>1.14</dt>
+        <dd>Added <i>responseType</i> support to <i>GM.xmlHttpRequest/GM_xmlhttpRequest</i></dd>
+
+      <dt>1.13</dt>
+        <dd>Fixed a bug with match pattern in Metadata Block <code>/* ... *://*/* ... */</code></dd>
+        <dd>Code Improvement</dd>
+
+      <dt>1.12</dt>
+        <dd>Stylus Import updated</dd>
+
+      <dt>1.11</dt>
+        <dd>Stylus Import sets <i>run-at</i> to <i>document-start</i></dd>
+        <dd>Import Preferences now updates the Script/CSS display</dd>
+
+      <dt>1.10</dt>
+        <dd>Fixed a typo that prevented the <i>run-at</i> changes from being applied</dd>
+
+      <dt>1.9</dt>
+        <dd>Style/Code Improvement</dd>
+        <dd>Prevent saving JS/CSS without a name</dd>
+
+      <dt>1.8</dt>
+        <dd>Added JS/CSS counter to toolbar badge</dd>
+        <dd>Removed pre-1.4 storage migration (install versions 1.4 to 1.7 to initiate migration first)</dd>
+
+      <dt>1.7</dt>
+        <dd>Added New JS/CSS buttons to toolbar pop-up</dd>
+        <dd>Added <kbd>Ctrl</kbd> + <kbd>s</kbd> keyboard shortcut to save the script while in the editor</dd>
+
+      <dt>1.6</dt>
+        <dd>Improved Metadata Block match function</dd>
+        <dd>Improved Tab Script display match function</dd>
+
+      <dt>1.5</dt>
+        <dd>Improved script Update function</dd>
+        <dd>Fixed the error with delete script</dd>
+
+      <dt>1.4</dt>
+        <dd>Improved userScript storage handling (migrate pre-1.4 storage)</dd>
+
+      <dt>1.3</dt>
+        <dd>Added Script Register Error Notification</dd>
+        <dd>Added include & match to matches conversation</dd>
+        <dd>Added exclude to excludeMatches conversation</dd>
+        <dd>Added conversation for some common incompatibilities with matches API</dd>
+        <dd>Update legend header on name change</dd>
+
+      <dt>1.2.1</dt>
+        <dd>Removed a leftover console.log</dd>
+
+      <dt>1.2</dt>
+        <dd>Fixed GreaseMoneky compatibility with run-at (GM use hyphen while API uses underscore)</dd>
+
+      <dt>1.1</dt>
+        <dd>Fixed an issue when pasting new scripts</dd>
+
+      <dt>1.0</dt>
+        <dd>Initial release</dd>
+    </dl>
+
+    <h2 id="credits">Credits</h2>
+    <dl class="about">
+      <dt>Icons</dt>
+        <dd>SVG: Martouf (https://openclipart.org/user-detail/Martouf)</dd>
+        <dd><img src="../image/help32.png" alt=""> Harwen (http://harwen.net/)</dd>
+        <dd>SVG: Mozilla</dd>
+        <dd>SVG: http://www.onlinewebfonts.com/icon</dd>
+
+      <dt>Syntax Highlight</dt>
+        <dd>CodeMirror (https://codemirror.net/)</dd>
+
+      <dt>Translations</dt>
+        <dd><a href="https://github.com/erosman/extension-translations" target="_blank">Github Public Repository</a></dd>
+        <dd><b>es</b>: </dd>
+        <dd><b>it:</b> </dd>
+        <dd><b>nl:</b> Heimen Stoffels/Vistaus</dd>
+        <dd><b>ru:</b> vanja-san</dd>
+        <dd><b>zh_CN:</b> yfdyh000, linsui</dd>
+        <dd><b>zh_TW:</b> s8321414</dd>
+
+    </dl>
+    </article>
+  </body>
+</html>
