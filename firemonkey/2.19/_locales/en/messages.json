@@ -86,7 +86,7 @@
   "optionsCustomCSS": { "message": "Options page custom CSS" },
   "optionsCustomCSSDescription": { "message": "Customize Options page & CodeMirror style configuration." },
   "popupCustomCSS": { "message": "Popup custom CSS" },
-  "popupCustomCSSDescription": { "message": "Customize Popup style configuration." },
+  "popupCustomCSSDescription": { "message": "Customize Popup style." },
   "cmOptionsDescription": { "message": "Customize CodeMirror, addons & JavaScript lint configuration." },
   "cmOptionsError": { "message": "Invalid CodeMirror JSON" },
 
