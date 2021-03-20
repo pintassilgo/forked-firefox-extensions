@@ -158,12 +158,27 @@ ul {
   padding: 0.1em;
   margin: 0;
   overflow-y: auto;
-  height: 10em;
   scrollbar-color: var(--scrollbar);
   scrollbar-width: thin;
 }
 
-ul.other {
+.main:not(.no-mix) ul {
+  height: 10em;
+}
+
+.main.no-mix h3.by-match-tab {
+  display: none;
+}
+
+.main:not(.no-mix) h3.by-type {
+  display: none;
+}
+
+.main.no-mix li:not(.tab) {
+  font-style: italic;
+}
+
+ul.second-group {
   flex-grow: 1;
 }
 

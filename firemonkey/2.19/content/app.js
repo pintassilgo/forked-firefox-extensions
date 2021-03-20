@@ -6,10 +6,12 @@ let pref = {
   autoUpdateLast: 0,
   content: {},
   counter: true,
+  dontMixPopup: false,
   globalScriptExcludeMatches: '',
   sync: false,
   template: { css: '', js: '' },
-  customCSS: '',
+  optionsCustomCSS: '',
+  popupCustomCSS: '',
   cmOptions: ''
 };
 // ----------------- /Default Preference -------------------

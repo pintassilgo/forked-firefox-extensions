@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Popup</title>
     <link rel="stylesheet" href="popup.css">
+
+    <!-- custom style -->
+    <style data-src="popup-custom-css"></style>
+
     <script type="module" src="popup.js"></script>
   </head>
   <body>
@@ -14,11 +18,13 @@
         <!-- template -->
         <template><li><span class="enable">&#x2714;</span><span class="name"></span></li></template>
 
-        <h3 data-i18n="tabScript"><span class="frame">&nbsp;</span></h3>
-        <ul class="tab"></ul>
+        <h3 class="by-match-tab" data-i18n="tabScript"><span class="frame">&nbsp;</span></h3>
+        <h3 class="by-type"><span class="frame">&nbsp;</span>Scripts</h3>
+        <ul class="first-group"></ul>
 
-        <h3 data-i18n="otherScript"></h3>
-        <ul class="other"></ul>
+        <h3 class="by-match-tab" data-i18n="otherScript"></h3>
+        <h3 class="by-type">CSS</h3>
+        <ul class="second-group"></ul>
 
         <h3 class="menu command" data-i18n="scriptCommands">&#x1f4e3; </h3>
         <h3 class="menu scratch" data-i18n="scratchpad">&#x1f4dd; </h3>
