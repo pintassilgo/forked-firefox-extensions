@@ -166,10 +166,7 @@ ul {
   height: 10em;
 }
 
-.main.no-mix h3.by-match-tab {
-  display: none;
-}
-
+.main.no-mix h3.by-match-tab,
 .main:not(.no-mix) h3.by-type {
   display: none;
 }
@@ -178,6 +175,7 @@ ul {
   font-style: italic;
 }
 
+.main.no-mix ul.first-group,
 ul.second-group {
   flex-grow: 1;
 }
