@@ -5,11 +5,13 @@ let pref = {
   autoUpdateInterval: 0,
   autoUpdateLast: 0,
   content: {},
+  dontMixPopup: false,
   counter: true,
   globalScriptExcludeMatches: '',
   sync: false,
   template: { css: '', js: '' },
-  customCSS: '',
+  optionsCustomCSS: '',
+  popupCustomCSS: '',
   cmOptions: ''
 };
 // ----------------- /Default Preference -------------------
