@@ -66,7 +66,7 @@
     <link rel="stylesheet" href="cm.css">
 
     <!-- custom style -->
-    <style data-src="custom-css"></style>
+    <style data-src="options-custom-css"></style>
 
     <script type="module" src="options.js"></script>
   </head>
@@ -144,6 +144,8 @@
           <label class="pointer" data-i18n="enableSync"><input type="checkbox" id="sync"></label>
           <label class="pointer" data-i18n="counter"><input type="checkbox" id="counter"></label>
           <br>
+          <label class="pointer"><input type="checkbox" id="dontMixPopup">Don't mix Scripts and Styles in Popup</label>
+          <br>
           <label data-i18n="globalScriptExcludeMatches">&#x1f310; </label>
           <p class="description" data-i18n="globalScriptExcludeMatchesDescription"></p>
           <textarea id="globalScriptExcludeMatches" rows="6" spellcheck="false" autocomplete="off" placeholder="*://*.example.com/*"></textarea>
@@ -152,11 +154,26 @@
 
             <details>
               <summary data-i18n="advanced">&#x2699;&#xfe0f; </summary>
-
-              <label data-i18n="customCSS"><img src="../image/css.svg" alt=""> </label>
-              <p class="description" data-i18n="customCSSDescription"></p>
-              <textarea id="customCSS" rows="6" spellcheck="false" autocomplete="off" placeholder=".CodeMirror {
+ 
+              <label data-i18n="optionsCustomCSS"><img src="../image/css.svg" alt=""> </label>
+              <p class="description" data-i18n="optionsCustomCSSDescription"></p>
+              <textarea id="optionsCustomCSS" rows="6" spellcheck="false" autocomplete="off" placeholder=".CodeMirror {
   font-family: monospace;
+}"></textarea>
+ 
+              <label data-i18n="popupCustomCSS"><img src="../image/css.svg" alt=""> </label>
+              <p class="description" data-i18n="popupCustomCSSDescription"></p>
+              <textarea id="popupCustomCSS" rows="6" spellcheck="false" autocomplete="off" placeholder=".main ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.main ul li:not(.disabled) {
+  order: 1;
+}
+
+.main ul li.disabled {
+  order: 2;
 }"></textarea>
 
               <label><img src="../image/codemirror.png" alt=""> CodeMirror</label>
