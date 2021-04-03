@@ -163,7 +163,7 @@ class ScriptRegister {
       ));
     }
 
-    let syntErr;
+    let compileErr;
     // --- script only
     if (js) {
 
@@ -200,7 +200,7 @@ class ScriptRegister {
       try{
         eval(`()=>{${script.js}\n}`);
       } catch (e) {
-        syntErr = e;
+        compileErr = e;
         let escapeComments = script.js.split('// ==/UserScript==');
         escapeComments[1] = escapeComments[1].replace(/\/\*|\*\//g, '*//*');
         script.js = escapeComments.join('// ==/UserScript==');
@@ -221,7 +221,7 @@ class ScriptRegister {
     }
 
     // --- add code
-    options[target].push({code: (syntErr ? `const err = new SyntaxError('${syntErr.message}');err.stack = \`@${userScriptURL}:${syntErr.lineNumber}:${syntErr.columnNumber}\`;console.error(err);/*` : '') + script[target].replace(Meta.regEx, (m) => m.replace(/\*\//g, '* /'))});
+    options[target].push({code: (compileErr ? `const err=new ${compileErr.constructor.name}('${compileErr.message.replace(/'/g, '\\\'')}');err.stack=\`@${userScriptURL}:${compileErr.lineNumber}:${compileErr.columnNumber}\`;console.error(err);/*` : '') + script[target].replace(Meta.regEx, (m) => m.replace(/\*\//g, '* /'))});
 
     if (script.style[0]) {
       // --- UserStyle Multi-segment Process
