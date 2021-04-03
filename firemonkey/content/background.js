@@ -699,6 +699,18 @@ class API {
       case 'getValue':
         return Promise.resolve(hasProperty(e.key) ? pref[storage][e.key] : e.defaultValue);
 
+      case 'getValues':
+        let obj = {};
+        if (e) {
+          e.forEach(key => {
+            if (hasProperty(key))
+              obj[key] = pref[storage][key];
+          })
+        } else {
+          obj = pref[storage];
+        }
+        return Promise.resolve(obj || {});
+
       case 'listValues':
         return Promise.resolve(pref[storage] ? Object.keys(pref[storage]) : []);
 
@@ -709,12 +721,27 @@ class API {
         pref[storage][e.key] = e.value;
         return browser.storage.local.set({[storage]: pref[storage]}); // Promise with no arguments OR reject with error message
 
+      case 'setValues':
+        pref[storage] || (pref[storage] = {});              // make one if didn't exist
+        for (let key in e) {
+          if (pref[storage][key] === e[key]) { continue; } // continue if value hasn't changed
+          oldValue = pref[storage][key];                    // need to cache it due to async processes
+          pref[storage][key] = e[key];
+        }
+        return browser.storage.local.set({[storage]: pref[storage]}); // Promise with no arguments OR reject with error message
+
       case 'deleteValue':
         if (!hasProperty(e.key)) { return true; }           // return if nothing to delete
         oldValue = pref[storage][e.key];                    // need to cache it due to async processes
         delete pref[storage][e.key];
         return browser.storage.local.set({[storage]: pref[storage]});
 
+      case 'deleteValues':
+        e.forEach(key => {
+          oldValue = pref[storage][key];                    // need to cache it due to async processes
+          delete pref[storage][key];
+        });
+        return browser.storage.local.set({[storage]: pref[storage]}); // Promise with no arguments OR reject with error message
 
       case 'openInTab':
         browser.tabs.create({url: e.url, active: e.active}); // Promise with tabs.Tab OR reject with error message
