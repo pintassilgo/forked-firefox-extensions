@@ -1,6 +1,10 @@
 ﻿import {pref, App, Meta, RemoteUpdate} from './app.js';
 const RU = new RemoteUpdate();
 
+browser.storage.onChanged.addListener((changes, area) => {
+  Object.keys(changes).forEach(item => pref[item] = changes[item].newValue);
+});
+
 // ----------------- Internationalization ------------------
 App.i18n();
 document.body.classList.toggle('dark', localStorage.getItem('dark') === 'true'); // Light/Dark Theme
@@ -1004,7 +1008,7 @@ class Script {
         delete pref.content[oldName];
         if (pref.hasOwnProperty('_' + oldName)) {           // move script storage
 
-          pref['_' + data.name] = pref['_' + oldName];
+          await browser.storage.local.set({ ['_' + data.name]: pref['_' + oldName] });
           await browser.storage.local.remove('_' + oldName);
         }
 
