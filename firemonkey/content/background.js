@@ -690,6 +690,18 @@ class API {
       case 'getValue':
         return Promise.resolve(hasProperty(e.key) ? pref[store][e.key] : e.defaultValue);
 
+      case 'getValues':
+        let obj = {};
+        if (e) {
+          e.forEach(key => {
+            if (hasProperty(key))
+              obj[key] = pref[store][key];
+          })
+        } else {
+          obj = pref[store];
+        }
+        return Promise.resolve(obj || {});
+
       case 'listValues':
         return Promise.resolve(pref[store] ? Object.keys(pref[store]) : []);
 
@@ -699,11 +711,25 @@ class API {
         pref[store][e.key] = e.value;
         return browser.storage.local.set({[store]: pref[store]}); // Promise with no arguments OR reject with error message
 
+      case 'setValues':
+        pref[store] || (pref[store] = {});              // make one if didn't exist
+        for (let key in e) {
+          if (pref[store][key] === e[key]) { continue; } // continue if value hasn't changed
+          pref[store][key] = e[key];
+        }
+        return browser.storage.local.set({[store]: pref[store]}); // Promise with no arguments OR reject with error message
+
       case 'deleteValue':
         if (!hasProperty(e.key)) { return true; }           // return if nothing to delete
         delete pref[store][e.key];
         return browser.storage.local.set({[store]: pref[store]});
 
+      case 'deleteValues':
+        e.forEach(key => {
+          delete pref[store][key];
+        });
+        return browser.storage.local.set({[store]: pref[store]}); // Promise with no arguments OR reject with error message
+ 
       case 'openInTab':
         browser.tabs.create({url: e.url, active: e.active}); // Promise with tabs.Tab OR reject with error message
         break;
