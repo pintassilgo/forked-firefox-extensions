@@ -103,6 +103,15 @@
       });
     },
 
+    async getValues (keys) {
+      const obj = await browser.runtime.sendMessage({
+        name,
+        api: 'getValues',
+        data: keys
+      });
+      return script.export(obj);
+    },
+
     async listValues() {
 
       const response = await browser.runtime.sendMessage({
@@ -124,6 +133,18 @@
       });
     },
 
+    async setValues(obj) {
+      for (let key in obj) {
+        if (!['string', 'number', 'boolean'].includes(typeof obj[key])) { throw `${name}: Unsupported value in getValues()`; }
+        cache[key] = obj[key];
+      }
+      return await browser.runtime.sendMessage({
+        name,
+        api: 'setValues',
+        data: obj
+      });
+    },
+
     async deleteValue(key) {
 
       delete cache[key];
@@ -131,6 +152,17 @@
         name,
         api: 'deleteValue',
         data: {key}
+      });
+    },
+
+    async deleteValues (keys) {
+      keys.forEach(key => {
+        delete cache[key];
+      })
+      return await browser.runtime.sendMessage({
+        name,
+        api: 'deleteValues',
+        data: keys
       });
     },
 
