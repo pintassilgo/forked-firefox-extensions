@@ -4,7 +4,12 @@
 App.i18n();
 
 // ----------------- User Preference -----------------------
-App.getPref().then(() => popup.process());
+App.getPref().then(() => {
+  popup.process();
+
+  // --- add custom style
+  pref.popupCustomCSS && (document.querySelector('style').textContent = pref.popupCustomCSS);
+});
 
 // ----------------- Android -------------------------------
 document.body.classList.toggle('android', navigator.userAgent.includes('Android'));

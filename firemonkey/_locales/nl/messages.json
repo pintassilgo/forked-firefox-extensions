@@ -84,8 +84,10 @@
 
   "advanced": { "message": "Geavanceerd" },
   "customCSS": { "message": "Aangepaste css" },
-  "customCSSDescription": { "message": "Pas de optiepagina en het CodeMirror-stijlblad aan." },
-  "cmOptionsDescription": { "message": "Pas de CodeMirror-, add-ons- en JavaScript-lintconfiguratie aan." },
+  "optionsCustomCSS": { "message": "Options page custom CSS" },
+  "optionsCustomCSSDescription": { "message": "Customize Options page & CodeMirror style configuration." },
+  "popupCustomCSS": { "message": "Popup custom CSS" },
+  "popupCustomCSSDescription": { "message": "Customize Popup style." },
   "cmOptionsError": { "message": "Ongeldige CodeMirror-json" },
 
 
