@@ -191,11 +191,17 @@
   "customCSS": {
     "message": "Потребителски стилов лист"
   },
-  "customCSSDescription": {
-    "message": "Настройка на изгледа на страницата с настройки и CodeMirror."
+  "optionsCustomCSS": {
+    "message": "Options page custom CSS"
   },
-  "cmOptionsDescription": {
-    "message": "Настройка на CodeMirror, добавките и проверките на кода на JavaScript."
+  "optionsCustomCSSDescription": {
+    "message": "Customize Options page & CodeMirror style configuration."
+  },
+  "popupCustomCSS": {
+    "message": "Popup custom CSS"
+  },
+  "popupCustomCSSDescription": {
+    "message": "Customize Popup style."
   },
   "cmOptionsError": {
     "message": "Грешен JSON на CodeMirror"
