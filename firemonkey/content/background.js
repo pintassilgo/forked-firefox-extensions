@@ -706,6 +706,18 @@ class API {
       case 'getValue':
         return Promise.resolve(pref[id].storage.hasOwnProperty(e.key) ? pref[id].storage[e.key] : e.defaultValue);
 
+      case 'getValues':
+        let obj = {};
+        if (e) {
+          e.forEach(key => {
+            if (pref[id].storage.hasOwnProperty(key))
+              obj[key] = pref[id].storage[key];
+          })
+        } else {
+          obj = pref[id].storage;
+        }
+        return Promise.resolve(obj || {});
+
       case 'listValues':
         return Promise.resolve(Object.keys(pref[id].storage));
 
@@ -714,11 +726,24 @@ class API {
         pref[id].storage[e.key] = e.value;
         return browser.storage.local.set({[id]: pref[id]}); // Promise with no arguments OR reject with error message
 
+      case 'setValues':
+        for (let key in e) {
+          if (pref[id].storage[key] === e[key]) { continue; } // continue if value hasn't changed
+          pref[id].storage[key] = e[key];
+        }
+        return browser.storage.local.set({[id]: pref[id]}); // Promise with no arguments OR reject with error message
+
       case 'deleteValue':
         if (!pref[id].storage.hasOwnProperty(e.key)) { return true; } // return if nothing to delete
         delete pref[id].storage[e.key];
         return browser.storage.local.set({[id]: pref[id]});
 
+      case 'deleteValues':
+        e.forEach(key => {
+          delete pref[id].storage[key];
+        });
+        return browser.storage.local.set({[id]: pref[id]}); // Promise with no arguments OR reject with error message
+ 
       case 'openInTab':
         browser.tabs.create({url: e.url, active: e.active}); // Promise with tabs.Tab OR reject with error message
         break;
