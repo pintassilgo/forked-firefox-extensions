@@ -6,8 +6,7 @@ class Config {
 
     this.lint = this.lint.bind(this);
 
-
-    // add custom meta lint in fm-lint.js 167-168
+    // add custom meta lint in fm-lint.js 184-185
     CodeMirror.registerHelper('firemonkey', 'lint', this.lint);
 
 
@@ -48,14 +47,35 @@ class Config {
 
     const text = cm.getValue();
     const js = cm.options.mode === 'javascript';
+    const meta = text.match(/^([\s\S]+)==(UserScript|UserCSS|UserStyle)==([\s\S]+)==\/\2==/i) || ['','','',''];
+    const b4 = meta[1].split(/\r?\n/).length;
+    const end = b4 + meta[3].split(/\r?\n/).length;
 
     // ------------- Lint Filter ---------------------------
-    const idx =[];
+    const idx =[];                                          // delete index cache
     annotationsNotSorted.forEach((item, index) => {
 
-      const m = item.message.match(/'(GM_getValue|GM_listValues|GM_getTabs?|GM_saveTab|exportFunction|cloneInto)' is not defined/)
+      const m = item.message.match(/'(GM_getValue|GM_listValues|GM_getTabs?|GM_saveTab|exportFunction|cloneInto)' is not defined/);
+      const {line, ch} = item.from;
 
       switch (true) {
+
+        // suppress CSSLint Metadata Block */ error
+        case !js && line > b4 && line < end:
+          idx.push(index);
+          break;
+
+        // suppress CSSLint Custom Properties --* error
+        case !js && item.message.startsWith('Expected RBRACE at line ') &&
+                cm.getLine(line).substring(ch).startsWith('--'):
+          idx.push(index);
+          break;
+
+        // suppress JSHint ES6 Unicode code point escapes \u{*****} error
+        case js && item.message.startsWith("Unexpected 'u{") &&
+                /^\\u\{[0-9a-f]+\}/.test(cm.getLine(line).substring(ch-1)):
+          idx.push(index);
+          break;
 
         case m && ['GM_getValue', 'GM_listValues'].includes(m[1]):
           item.message = m[1] + ' is partially supported. Read the Help for more information.';
@@ -68,6 +88,7 @@ class Config {
 
         case item.message === '`var` declarations are forbidden. Use `let` or `const` instead.':
           item.message = 'Since ECMAScript 6 (2015), it is recommended to use `let` & `const` instead of `var`.';
+          item.severity = 'info';
           break;
 
         case m && ['exportFunction', 'cloneInto'].includes(m[1]):
@@ -79,6 +100,8 @@ class Config {
     // ------------- /Lint Filter --------------------------
 
     // ------------- Metadata Block lint -------------------
+    if (!meta[3]) { return; }
+
     const supported = ['@name', '@author', '@description', '@version', '@updateURL', '@match',
           '@matches', '@include', '@exclude', '@exclude-match', '@excludeMatches', '@includeGlobs',
           '@excludeGlobs', '@matchAboutBlank', '@allFrames', '@noframes', '@require', '@resource',
@@ -86,11 +109,6 @@ class Config {
 
     const unsupported = ['@namespace', '@grant', '@icon', '@supportURL', '@homepageURL', '@connect', '@unwrap', '@nocompat'];
 
-
-    const meta = text.match(/^([\s\S]+)==(UserScript|UserCSS|UserStyle)==([\s\S]+)==\/\2==/i);
-    if (!meta) { return; }
-
-    const b4 = meta[1].split(/\r?\n/).length;
     const sticky = null;
 
     meta[3].split(/\r?\n/).forEach((item, index) =>  {      // lines
@@ -134,8 +152,6 @@ class Config {
           severity = 'error';
           break;
 
-
-
         case prop.startsWith('@'):
           message = `${prop} is not processed.`;
           severity = 'info';
@@ -158,12 +174,11 @@ class Config {
       message = '';
       switch (true) {
 
-        case prop === '@include' && /^\/[^/]{1}.+\/$/.test(value):
-        case prop === '@exclude' && /^\/[^/]{1}.+\/$/.test(value):
-          message = '@match performance is more efficient than Regular Expression.';
+        // Regular Expression
+        case ['@include', '@exclude'].includes(prop) && value.startsWith('/') && value.endsWith('/'):
+          message = 'Regular Expression is not supported.';
           severity = 'info';
           break;
-
 
         case prop === '@include':
         case prop === '@exclude':
@@ -173,12 +188,6 @@ class Config {
             attributes: {'data-line': line, 'data-index': ch}
           });
           break;
-
-        case !js && value.includes('*/'):
-         // cm.replaceRange({line, ch},{line, ch: ch + value.length}, value.replace(/\*\//, '✱✺/'));
-          //console.log(value.replace(/\*\//, '∗/'));
-          break;
-
 
         case !js || prop !== '@grant': break;
         // all js & grant
@@ -194,7 +203,6 @@ class Config {
         case /^(GM(\.|_)(getTabs?|saveTab)$)/.test(value):
           message = `${value} is not supported.`;
           break;
-
       }
 
       ch = item.indexOf(value);
@@ -204,7 +212,6 @@ class Config {
         from: {line, ch, sticky},
         to: {line, ch: ch + value.length, sticky}
       });
-
     });
     // ------------- /Metadata Block lint ------------------
 
@@ -222,7 +229,6 @@ class Config {
       });
     });
     // ------------- /regexp check -------------------------
-
 
     this.report(cm, annotationsNotSorted);
   }

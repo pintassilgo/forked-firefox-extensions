@@ -1,29 +1,37 @@
 ﻿browser.userScripts.onBeforeScript.addListener(script => {
 
-  const name = script.metadata.name;
-  const resource = script.metadata.resource;
+  const {name, resource} = script.metadata;
 
   // --------------- Script Storage ------------------------
-  const store = '_' + name;
+  const id = '_' + name;                                    // set id as _name
   let storage = script.metadata.storage;
-  browser.storage.local.get(store).then((result = {}) => storage = result[store] || {});
+  browser.storage.local.get(id).then((result = {}) => storage = result[id].storage);
 
   const cache = {};
   const valueChange = {};
 
   function storageChange(changes, area) {
 
-    if (changes.hasOwnProperty(store)) {
+    if (changes.hasOwnProperty(id)) {
 
-      const oldValue = changes[store].oldValue || {};
-      const newValue = changes[store].newValue || {};
+      const oldValue = changes[id].storage.oldValue || {};
+      const newValue = changes[id].storage.newValue || {};
 
-       // process addValueChangeListener (only for remote) (key, oldValue, newValue, remote)
+      // process addValueChangeListener (only for remote) (key, oldValue, newValue, remote)
       Object.keys(valueChange).forEach(item =>
          oldValue[item] !== newValue[item] &&
           (valueChange[item])(item, oldValue[item], newValue[item], newValue[item] !== cache[item])
       );
     }
+  }
+
+  // ----- synch APIs
+  function GM_getValue(key, defaultValue) {
+    return storage.hasOwnProperty(key) ? storage[key] : defaultValue;
+  }
+
+  function GM_listValues() {
+    return script.export(Object.keys(storage));
   }
 
   // --------------- Script Command ------------------------
@@ -69,8 +77,7 @@
   // ----- auxiliary regex include/exclude test function
   function matchURL() {
     const url = location.href;
-    const includes = script.metadata.info.script.includes;
-    const excludes = script.metadata.info.script.excludes;
+    const {includes, excludes} = script.metadata.info.script;
     return (!includes[0] || arrayTest(includes, url)) && (!excludes[0] || !arrayTest(excludes, url));
   }
 
@@ -85,14 +92,6 @@
 
   // --------------- GM4 Object based functions ------------
   const GM = {
-
-    _getValue(key, defaultValue) {
-      return storage.hasOwnProperty(key) ? storage[key] : defaultValue;
-    },
-
-    _listValues() {
-      return script.export(Object.keys(storage));
-    },
 
     async getValue(key, defaultValue) {
 
@@ -181,7 +180,7 @@
       });
 
       // cloneInto() work around for https://bugzilla.mozilla.org/show_bug.cgi?id=1583159
-      return response ? (typeof response === 'string' ? script.export(response) : cloneInto(response, window)) : null;
+      return response ? cloneInto(response, window) : null;
     },
 
     async xmlHttpRequest(init) {
@@ -254,10 +253,10 @@
 
       if (!css) { return; }
       try {
-        const style = document.createElement('style');
-        style.textContent = css;
-        style.dataset.src = name + '.user.js';
-        (document.head || document.body || document.documentElement || document).appendChild(style);
+        const node = document.createElement('style');
+        node.textContent = css;
+        node.dataset.src = name + '.user.js';
+        (document.head || document.body || document.documentElement || document).appendChild(node);
       } catch(error) { log(`addStyle ➜ ${error.message}`, 'error'); }
     },
 
@@ -265,10 +264,14 @@
 
       if (!js) { return; }
       try {
-        const script = document.createElement('script');
-        script.textContent = js;
-        (document.body || document.head || document.documentElement || document).appendChild(script);
-        script.remove();
+        const node = document.createElement('script');
+        node.textContent = js;
+        if (script.metadata.injectInto !== 'page') {
+          node.textContent +=
+            `\n\n//# sourceURL=user-script:FireMonkey/${encodeURI(name)}/GM.addScript_${Math.random().toString(36).substring(2)}.js`;
+        }
+        (document.body || document.head || document.documentElement || document).appendChild(node);
+        node.remove();
       } catch(error) { log(`addScript ➜ ${error.message}`, 'error'); }
     },
 
@@ -293,7 +296,6 @@
       host.classList.toggle('modal', type.startsWith('panel-') ? modal : true); // process modal
 
       style.textContent = `
-
         :host, *, ::before, ::after {
           box-sizing: border-box;
         }
@@ -307,7 +309,6 @@
           position: fixed;
           z-index: 10000;
           transition: all 0.5s ease-in-out;
-          box-sizing: border-box;
         }
 
         :host(.on) { display: flex; }
@@ -400,7 +401,6 @@
       document.body.appendChild(host);
 
       const obj = {
-
         host,
         style,
         content,
@@ -411,20 +411,17 @@
         },
 
         append(...arg) {
-
           typeof arg[0] === 'string' && /^<.+>$/.test(arg[0].trim()) ?
             content.append(document.createRange().createContextualFragment(arg[0].trim())) :
               content.append(...arg);
         },
 
         show() {
-
           host.style.opacity = 1;
           host.classList.toggle('on', true);
         },
 
         hide(e) {
-
           if (!e || [host, close].includes(e.originalTarget)) {
             host.style.opacity = 0;
             setTimeout(() => { host.classList.toggle('on', false); }, 500);
@@ -449,8 +446,8 @@
   script.defineGlobals({
 
     GM,
-    GM_getValue:                  GM._getValue,
-    GM_listValues:                GM._listValues,
+    GM_getValue,
+    GM_listValues,
     GM_deleteValue:               GM.deleteValue,
     GM_setValue:                  GM.setValue,
     GM_addValueChangeListener:    GM.addValueChangeListener,

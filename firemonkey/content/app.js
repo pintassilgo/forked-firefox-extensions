@@ -4,13 +4,12 @@
 let pref = {
   autoUpdateInterval: 0,
   autoUpdateLast: 0,
-  content: {},
+  cmOptions: '',
   counter: true,
+  customCSS: '',
   globalScriptExcludeMatches: '',
   sync: false,
-  template: { css: '', js: '' },
-  customCSS: '',
-  cmOptions: ''
+  template: {css: '', js: ''}
 };
 // ----------------- /Default Preference -------------------
 
@@ -36,49 +35,63 @@ class App {
     const file = e.target.files[0];
     switch (true) {
 
-      case !file: App.notify(chrome.i18n.getMessage('error')); return;
+      case !file: App.notify(browser.i18n.getMessage('error')); return;
       case !['text/plain', 'application/json'].includes(file.type): // check file MIME type
-        App.notify(chrome.i18n.getMessage('fileTypeError'));
+        App.notify(browser.i18n.getMessage('fileTypeError'));
         return;
     }
 
     const reader  = new FileReader();
     reader.onloadend = () => App.readData(reader.result);
-    reader.onerror = () => App.notify(chrome.i18n.getMessage('fileReadError'));
+    reader.onerror = () => App.notify(browser.i18n.getMessage('fileReadError'));
     reader.readAsText(file);
   }
 
-  static readData(data) {
+  static async readData(data) {
 
     let importData;
     try { importData = JSON.parse(data); }                  // Parse JSON
     catch(e) {
-      App.notify(chrome.i18n.getMessage('fileParseError'));     // display the error
+      App.notify(browser.i18n.getMessage('fileParseError')); // display the error
       return;
     }
 
-    Object.keys(pref).forEach(item =>
-      importData.hasOwnProperty(item) && (pref[item] = importData[item])); // update pref with the saved version
-    
-    // import userscript storage
-    Object.keys(importData).forEach(item => {
-      const name = item.startsWith('_') && item.substring(1);
-      if (name && pref.content[name] && pref.content[name].js) { pref[item] = importData[item]; }
-    });
-
+    // --- importing pre-2.25 data
+    if (importData.hasOwnProperty('content')) {
+      localStorage.removeItem('migrate');                   // prepare to migrate
+      pref = importData;
+      await Migrate.run();                                  // migrate
+    }
+    // update pref with the saved version
+    else {
+      Object.keys(importData).forEach(item =>
+            (pref.hasOwnProperty(item) || item.startsWith('_')) && (pref[item] = importData[item]));
+    }
     this.callback();                                        // successful import
   }
 
   static export() {
 
     const data = JSON.stringify(pref, null, 2);
-    const blob = new Blob([data], {type : 'text/plain;charset=utf-8'});
-    const filename = chrome.i18n.getMessage('extensionName') + '_' + new Date().toISOString().substring(0, 10) + '.json';
+    const filename = browser.i18n.getMessage('extensionName') + '_' + new Date().toISOString().substring(0, 10) + '.json';
+    App.saveFile(data, filename);
+  }
 
-    chrome.downloads.download({
+  static saveFile(data, filename, saveAs = true) {
+
+    if (this.android) {
+      const a = document.createElement('a');
+      a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(data);
+      a.setAttribute('download', filename);
+      a.dispatchEvent(new MouseEvent('click'));
+      return;
+    }
+
+    const blob = new Blob([data], {type : 'text/plain;charset=utf-8'});
+    browser.downloads.download({
       url: URL.createObjectURL(blob),
       filename,
-      saveAs: true,
+      saveAs,
       conflictAction: 'uniquify'
     });
   }
@@ -88,14 +101,17 @@ class App {
   static i18n() {
     document.querySelectorAll('[data-i18n]').forEach(node => {
       let [text, attr] = node.dataset.i18n.split('|');
-      text = chrome.i18n.getMessage(text);
+      text = browser.i18n.getMessage(text);
       attr ? node[attr] = text : node.appendChild(document.createTextNode(text));
     });
+
+    document.body.classList.toggle('dark', localStorage.getItem('dark') === 'true'); // light/dark theme
+    document.body.style.opacity = 1;                            // show after i18n
   }
 
-  static notify(message, title = chrome.i18n.getMessage('extensionName'), id = '') {
+  static notify(message, title = browser.i18n.getMessage('extensionName'), id = '') {
 
-    chrome.notifications.create(id, {
+    browser.notifications.create(id, {
       type: 'basic',
       iconUrl: '/image/icon.svg',
       title,
@@ -112,33 +128,28 @@ class App {
   }
 
   static JSONparse(str) {
-
     try { return JSON.parse(str); } catch (e) { return null; }
   }
 
-  // bg & options
-  static async prepareRename(oldName, newName, bg) {
+  static getIds() {
+    return Object.keys(pref).filter(item => item.startsWith('_'));
+  }
 
-    const oldStore = '_' + oldName;
-    const newStore = '_' + newName;
+  static allowedHost(url) {                                 // bg & options
 
-    if (pref.hasOwnProperty(oldStore)) {                    // move script storage
-
-      const storage = bg ? pref : await browser.storage.local.get(oldStore); // get the latest storage data, bg has the latest
-      pref[newStore] = storage[oldStore];                   // update pref
-      delete pref[oldStore];
-      await browser.storage.local.remove(oldStore);         // delete old script storage
-      await browser.storage.local.set({[newStore]: pref[newStore]}); // set storage under new name
-    }
-    delete pref.content[oldName];
+    return  url.startsWith('https://greasyfork.org/scripts/') ||
+            url.startsWith('https://sleazyfork.org/scripts/') ||
+            url.startsWith('https://openuserjs.org/install/') ||
+            url.startsWith('https://userstyles.org/styles/') ||
+            url.startsWith('https://raw.githubusercontent.com/');
   }
 }
+App.android = navigator.userAgent.includes('Android');
 
 // ----------------- Parse Metadata Block ------------------
-// bg options
-class Meta {
+class Meta {                                                // bg options
 
-  static get (str, userMatches = '', userExcludeMatches = '') {
+  static get(str, userMatches = '', userExcludeMatches = '') {
 
     // --- get all
     const metaData = str.match(this.regEx);
@@ -171,6 +182,7 @@ class Meta {
         description: {}
       },
       error: '',                                            // reset error on save
+      storage: {},
 
       // --- API related data
       allFrames: false,
@@ -467,10 +479,9 @@ Meta.regEx = /==(UserScript|UserCSS|UserStyle)==([\s\S]+)==\/\1==/i;
 
 
 // ----------------- Remote Update -------------------------
-// bg options
-class RemoteUpdate {
+class RemoteUpdate {                                        // bg options
 
-  getUpdate(item, manual) { // bg 1 opt 1
+  getUpdate(item, manual) {                                 // bg 1 opt 1
 
     switch (true) {
       // --- get meta.js
@@ -490,13 +501,13 @@ class RemoteUpdate {
     }
   }
 
-  getMeta(item, manual) { // here
+  getMeta(item, manual) {                                   // here
 
     const url = item.updateURL.replace(/\.user\.(js|css)/i, '.meta.$1');
     fetch(url)
     .then(response => response.text())
     .then(text => this.needUpdate(text, item) ? this.getScript(item) :
-                      manual && App.notify(chrome.i18n.getMessage('noNewUpdate'), item.name))
+                      manual && App.notify(browser.i18n.getMessage('noNewUpdate'), item.name))
     .catch(error => App.log(item.name, `getMeta ${url} ➜ ${error.message}`, 'error'));
   }
 
@@ -508,7 +519,7 @@ class RemoteUpdate {
     .then(text => {
       const m = text.match(/@version\s+(\S+)/);
       const version = m ? m[1].substring(2,10) : '';
-      version > item.version ? this.getStylish(item, version) : manual && App.notify(chrome.i18n.getMessage('noNewUpdate'), item.name);
+      version > item.version ? this.getStylish(item, version) : manual && App.notify(browser.i18n.getMessage('noNewUpdate'), item.name);
     })
     .catch(error => App.log(item.name, `getMeta ${url} ➜ ${error.message}`, 'error'));
   }
@@ -529,17 +540,17 @@ class RemoteUpdate {
 
     fetch(item.updateURL)
     .then(response => response.text())
-    .then(text =>  this.callback(metaData + '\n\n' + text, item.name, item.updateURL))
+    .then(text => !text.trim().startsWith('<') && this.callback(metaData + '\n\n' + text, item.name, item.updateURL)) // check HTML timeout response
     .catch(error => App.log(item.name, `getStylish ${item.updateURL} ➜ ${error.message}`, 'error'));
   }
 
-  needUpdate(text, item) { // here
+  needUpdate(text, item) {                                  // here
     // --- check version
     const version = text.match(/@version\s+(\S+)/);
     return version && this.higherVersion(version[1], item.version);
   }
 
-  getScript(item) { // here bg 1
+  getScript(item) {                                         // here bg 1
 
     fetch(item.updateURL)
     .then(response => response.text())
@@ -547,7 +558,7 @@ class RemoteUpdate {
     .catch(error => App.log(item.name, `getScript ${item.updateURL} ➜ ${error.message}`, 'error'));
   }
 
-  higherVersion(a, b) { // here bg 1 opt 1
+  higherVersion(a, b) {                                     // here bg 1 opt 1
 
     a = a.split('.');
     b = b.split('.');
@@ -574,21 +585,22 @@ class CheckMatches {
 
     tabUrl = /^(https?|wss?|file|about:blank)/.test(tabUrl) ? tabUrl : null; // Unsupported scheme
 
+    const ids = App.getIds();
+
     // --- background
     if (bg) {
-      return Object.keys(pref.content).filter(item =>
-                pref.content[item].enabled && this.get(pref.content[item], tabUrl, urls, gExclude));
+      return ids.filter(item => pref[item].enabled && this.get(pref[item], tabUrl, urls, gExclude))
+          .map(item => (pref[item].js ? '\u{1f539} ' :  '\u{1f538} ') + item.substring(1));
     }
 
     // --- popup
     const Tab = [], Other = [];
-    Object.keys(pref.content).sort(Intl.Collator().compare).forEach(item =>
-        (this.get(pref.content[item], tabUrl, urls, gExclude) ? Tab : Other).push(item));
+    ids.sort(Intl.Collator().compare).forEach(item =>
+        (this.get(pref[item], tabUrl, urls, gExclude) ? Tab : Other).push(item));
     return [Tab, Other, frames];
   }
 
-  // here
-  static get(item, tabUrl, urls, gExclude = []) {
+  static get(item, tabUrl, urls, gExclude = []) {           // here
 
     if (!tabUrl) { return false; }
 
@@ -624,8 +636,7 @@ class CheckMatches {
     }
   }
 
-  // here
-  static isMatch(urls, arr, glob, regex) {
+  static isMatch(urls, arr, glob, regex) {                  // here
 
     if (regex) {
       return urls.some(u => new RegExp(this.prepareRegEx(arr), 'i').test(u));
@@ -647,8 +658,7 @@ class CheckMatches {
     return urls.some(u => new RegExp(this.prepareMatch(arr), 'i').test(u));
   }
 
-  // here
-  static prepareMatch(arr) {
+  static prepareMatch(arr) {                                // here
 
     const regexSpChar = /[-\/\\^$+?.()|[\]{}]/g;            // Regular Expression Special Characters
     const str = arr.map(item => '(^' +
@@ -668,4 +678,3 @@ class CheckMatches {
   }
 }
 // ----------------- /Match Pattern Check ------------------
-
