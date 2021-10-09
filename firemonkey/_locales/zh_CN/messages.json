@@ -183,11 +183,17 @@
   "customCSS": {
     "message": "自定义 CSS"
   },
-  "customCSSDescription": {
-    "message": "自定义选项页面 & CodeMirror 样式配置。"
+  "optionsCustomCSS": {
+    "message": "Options page custom CSS"
   },
-  "cmOptionsDescription": {
-    "message": "自定义 CodeMirror, 插件 & JavaScript lint 配置。"
+  "optionsCustomCSSDescription": {
+    "message": "Customize Options page & CodeMirror style configuration."
+  },
+  "popupCustomCSS": {
+    "message": "Popup custom CSS"
+  },
+  "popupCustomCSSDescription": {
+    "message": "Customize Popup style."
   },
   "cmOptionsError": {
     "message": "无效 CodeMirror JSON"
