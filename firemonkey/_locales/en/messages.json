@@ -77,8 +77,10 @@
   "findScript": { "message": "Find scripts for this site" },
 
   "advanced": { "message": "Advanced" },
-  "customCSS": { "message": "Custom CSS" },
-  "customCSSDescription": { "message": "Customize Options page & CodeMirror style configuration." },
+  "optionsCustomCSS": { "message": "Options page custom CSS" },
+  "optionsCustomCSSDescription": { "message": "Customize Options page & CodeMirror style configuration." },
+  "popupCustomCSS": { "message": "Popup custom CSS" },
+  "popupCustomCSSDescription": { "message": "Customize Popup style." },
   "cmOptionsDescription": { "message": "Customize CodeMirror, addons & JavaScript lint configuration." },
   "cmOptionsError": { "message": "Invalid CodeMirror JSON" },
 
