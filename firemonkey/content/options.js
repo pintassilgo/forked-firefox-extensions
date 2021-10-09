@@ -10,7 +10,7 @@ App.getPref().then(() => {
   script.process();
 
   // --- add custom style
-  pref.customCSS && (document.querySelector('style').textContent = pref.customCSS);
+  pref.optionsCustomCSS && (document.querySelector('style').textContent = pref.optionsCustomCSS);
 });
 // ----------------- /User Preference ----------------------
 
@@ -97,7 +97,7 @@ class Options {
     }
   }
 }
-const options = new Options(['autoUpdateInterval', 'globalScriptExcludeMatches', 'sync', 'counter', 'customCSS', 'cmOptions']);
+const options = new Options(['autoUpdateInterval', 'globalScriptExcludeMatches', 'sync', 'counter', 'optionsCustomCSS', 'popupCustomCSS', 'cmOptions']);
 // ----------------- /Options ------------------------------
 
 // ----------------- Scripts -------------------------------

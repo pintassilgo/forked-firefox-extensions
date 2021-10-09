@@ -6,8 +6,9 @@ let pref = {
   autoUpdateLast: 0,
   cmOptions: '',
   counter: true,
-  customCSS: '',
   globalScriptExcludeMatches: '',
+  optionsCustomCSS: '',
+  popupCustomCSS: '',
   sync: false,
   template: {css: '', js: ''}
 };
