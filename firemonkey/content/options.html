@@ -147,10 +147,25 @@
             <details>
               <summary data-i18n="advanced">&#x2699;&#xfe0f; </summary>
 
-              <label data-i18n="customCSS"><img src="../image/css.svg" alt=""> </label>
-              <p class="description" data-i18n="customCSSDescription"></p>
-              <textarea id="customCSS" rows="6" spellcheck="false" autocomplete="off" placeholder=".CodeMirror {
+              <label data-i18n="optionsCustomCSS"><img src="../image/css.svg" alt=""> </label>
+              <p class="description" data-i18n="optionsCustomCSSDescription"></p>
+              <textarea id="optionsCustomCSS" rows="6" spellcheck="false" autocomplete="off" placeholder=".CodeMirror {
   font-family: monospace;
+}"></textarea>
+
+              <label data-i18n="popupCustomCSS"><img src="../image/css.svg" alt=""> </label>
+              <p class="description" data-i18n="popupCustomCSSDescription"></p>
+              <textarea id="popupCustomCSS" rows="6" spellcheck="false" autocomplete="off" placeholder=".main ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.main ul li:not(.disabled) {
+  order: 1;
+}
+
+.main ul li.disabled {
+  order: 2;
 }"></textarea>
 
               <label><img src="../image/codemirror.png" alt=""> CodeMirror</label>
