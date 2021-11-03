@@ -6,6 +6,7 @@ let pref = {
   autoUpdateLast: 0,
   cmOptions: '',
   counter: true,
+  dontMixPopup: false,
   globalScriptExcludeMatches: '',
   optionsCustomCSS: '',
   popupCustomCSS: '',
