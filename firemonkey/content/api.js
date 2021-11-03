@@ -9,13 +9,13 @@
   const cache = {};
   const valueChange = {};
 
-  function storageChange(changes, area) {
+  function storageChange(changes) {
     if (changes.hasOwnProperty(id)) {
-      const {oldValue = {}, newValue = {}} = changes[id].storage;
+      const {oldValue: {storage: oldValues = {}}, newValue: {storage: newValues = {}}} = changes[id];
       // process addValueChangeListener (only for remote) (key, oldValue, newValue, remote)
       Object.keys(valueChange).forEach(item =>
-         oldValue[item] !== newValue[item] &&
-          (valueChange[item])(item, oldValue[item], newValue[item], newValue[item] !== cache[item])
+         oldValues[item] !== newValues[item] &&
+          (valueChange[item])(item, oldValues[item], newValues[item], newValues[item] !== cache[item])
       );
     }
   }
