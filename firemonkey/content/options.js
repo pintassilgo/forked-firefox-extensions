@@ -904,10 +904,19 @@ class Script {
 
     // --- chcek meta data
     const data = Meta.get(box.value.trim(), this.userMatches.value, this.userExcludeMatches.value);
+    let hasError;
     if (!data) { throw 'Meta Data Error'; }
     else if (data.error) {
       App.notify(browser.i18n.getMessage('metaError'));
       return;
+    } else {
+      [...data.matches, ...data.excludeMatches].forEach((pattern, i) => {
+        const error = Pattern.check(pattern);
+        if (error) {
+          App.notify(`@${i < data.matches.length ? 'match' : 'exclude-match'}\n${pattern}\n${error}`);
+          hasError = true;
+        }
+      });
     }
 
     // --- check name
@@ -956,7 +965,8 @@ class Script {
 
       // --- update menu list
       const li = document.querySelector('aside li.on');
-      li.classList.remove('error');                         // reset error
+      if (hasError) li.classList.add('error');
+      else li.classList.remove('error');
       li.textContent = data.name;
       li.id = id;
     }
