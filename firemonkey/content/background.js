@@ -202,7 +202,7 @@ class ScriptRegister {
         escapeComments[1] = escapeComments[1].replace(/\/\*|\*\//g, '*//*');
         script.js = escapeComments.join('// ==/UserScript==');
       }
-      script.js = `try{${script.js}}catch(e){console.error(e)}${sourceURL}`;
+      script.js = `try{${script.js}\n/**/}catch(e){console.error(e)}${sourceURL}`;
 
       // --- process inject-into page context
       if (page) {
