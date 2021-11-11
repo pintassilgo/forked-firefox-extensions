@@ -135,7 +135,7 @@ class ScriptRegister {
         requireRemote.push('/' + item);
       }
       else if (pref[id] && pref[id][target]) {              // same type only
-        let code = this.prepareMeta(pref[id][target]);
+        let code = this.prepareMeta(pref[id]);
         js && (code += sourceURL + encodeURI(item) + '.user.js');
         page && (code = `GM_addScript(${JSON.stringify(code)})`);
         options[target].push({code});
@@ -216,7 +216,7 @@ class ScriptRegister {
     }
 
     // --- add code
-    options[target].push({code: (compileErr ? `const err=new ${compileErr.constructor.name}('${compileErr.message.replace(/'/g, '\\\'')}');err.stack=\`@${userScriptURL}:${compileErr.lineNumber}:${compileErr.columnNumber}\`;console.error(err);/*` : '') + this.prepareMeta(script[target])});
+    options[target].push({code: (compileErr ? `const err=new ${compileErr.constructor.name}('${compileErr.message.replace(/'/g, '\\\'')}');err.stack=\`@${userScriptURL}:${compileErr.lineNumber}:${compileErr.columnNumber}\`;console.error(err);/*` : '') + this.prepareMeta(script)});
 
     if (script.style[0]) {
       // --- UserStyle Multi-segment Process
@@ -230,13 +230,9 @@ class ScriptRegister {
   }
 
   // fixing metadata block since there would be an error with /* ... *://*/* ... */
-  prepareMeta(str) {
-    return str.replace(Meta.regEx, (m) =>
-      !m.includes('*/') ? m :
-        m.split(/[\r\n]+/).map(item =>
-          item.trim().startsWith('//') || !/@([\w:-]+)(?:\s+(.+))/.test(item) ? item : item.replace(/\*\//g, '* /')
-        ).join('\n')
-    );
+  prepareMeta(item) {
+    if (item.js) return item.js;
+    return item.css.replace(Meta.regEx, (m) => m.replace(/\*\//g, '* /'));
   }
 
   register(id, options, originId) {
