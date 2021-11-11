@@ -164,11 +164,17 @@
   "advanced": {
     "message": "Avançado"
   },
-  "customCSS": {
-    "message": "CSS personalizado"
+  "optionsCustomCSS": {
+    "message": "CSS personalizado para a página de Opções"
   },
-  "customCSSDescription": {
+  "optionsCustomCSSDescription": {
     "message": "Personalizar estilo da página de Opções & CodeMirror."
+  },
+  "popupCustomCSS": {
+    "message": "CSS personalizado para a Popup"
+  },
+  "popupCustomCSSDescription": {
+    "message": "Personalizar estilo da Popup."
   },
   "cmOptionsDescription": {
     "message": "Personalizar configuração do CodeMirror, addons & JavaScript lint"
