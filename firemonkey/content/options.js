@@ -1162,30 +1162,12 @@ class Pattern {
 
   static check(pattern) {
     pattern = pattern.toLowerCase();
-    const [scheme, host, path] = pattern.split(/:\/{2,3}|\/+/);
 
-    // --- specific patterns
-    switch (pattern) {
-      case '*': return 'Invalid Pattern';
-
-      case '<all_urls>':
-      case '*://*/*':
-      case 'http://*/*':
-      case 'https://*/*':
-        return false;
-    }
-
-    // --- other patterns
-    switch (true) {
-      case !['http', 'https', 'file', '*'].includes(scheme.toLowerCase()): return 'Unsupported scheme';
-      case scheme === 'file' && !pattern.startsWith('file:///'): return 'file:/// must have 3 slashes';
-      case scheme !== 'file' && host.includes(':'): return 'Host must not include a port number';
-      case scheme !== 'file' && !path && host === '*': return 'Empty path: this should be "*://*/*"';
-      case scheme !== 'file' && !path && !pattern.endsWith('/'): return 'Pattern must include trailing slash';
-      case scheme !== 'file' && host[0] === '*' && host[1] !== '.': return '"*" in host must be the only character or be followed by "."';
-      case host.substring(1).includes('*'): return '"*" in host must be at the start';
-    }
-    return false;
+    if (pattern === '<all_urls>' ||
+        /^(\*|https?|wss?|file|data):\/{2,3}(\*|(?:\*.)?[^:*]+?)(?!:\d+)(\/.*)/.test(pattern))
+      return false;
+    else
+      return 'Invalid Match Pattern.';
   }
 }
 // ----------------- /Match Pattern Tester -----------------
