@@ -121,8 +121,11 @@ class ScriptRegister {
     const js = target === 'js';
     const page = js && script.injectInto === 'page';
     const pageURL = page ? '%20(page-context)'  : '';
-    const encodeId = encodeURI(name);
-    const sourceURL = `\n\n//# sourceURL=user-script:FireMonkey/${encodeId}${pageURL}/`;
+    const encodeId = encodeURI(name).replace(/\//g, '%2F');
+    const baseURL = `user-script:FireMonkey/${encodeId}${pageURL}/`;
+    const baseSourceURL = `/**/\n//# sourceURL=${baseURL}`;
+    const userScriptURL = `${baseURL}${encodeId}.user.js`;
+    const sourceURL = `${baseSourceURL}${encodeId}.user.js`;
     options[target] = [];
 
     // --- add @require
@@ -133,7 +136,7 @@ class ScriptRegister {
       }
       else if (pref[id] && pref[id][target]) {              // same type only
         let code = this.prepareMeta(pref[id][target]);
-        js && (code += sourceURL + encodeURI(item) + '.user.js');
+        js && (code += baseSourceURL + encodeURI(item) + '.user.js');
         page && (code = `GM_addScript(${JSON.stringify(code)})`);
         options[target].push({code});
       }
@@ -158,6 +161,7 @@ class ScriptRegister {
 
 
     // --- script only
+    let compileErr;
     if (js) {
       const {includes, excludes} = script;
       options.scriptMetadata = {
@@ -189,7 +193,15 @@ class ScriptRegister {
       };
 
       // --- add debug
-      script.js += sourceURL + encodeId + '.user.js';
+      try{
+        eval(`()=>{${script.js}\n}`);
+      } catch (e) {
+        compileErr = e;
+        let escapeComments = script.js.split('// ==/UserScript==');
+        escapeComments[1] = escapeComments[1].replace(/\/\*|\*\//g, '*//*');
+        script.js = escapeComments.join('// ==/UserScript==');
+      }
+      script.js = `try{${script.js}\n/**/}catch(e){console.error(e)}${sourceURL}`;
 
       // --- process inject-into page context
       if (page) {
@@ -206,7 +218,7 @@ class ScriptRegister {
     }
 
     // --- add code
-    options[target].push({code: this.prepareMeta(script[target])});
+    options[target].push({code: (compileErr ? `const err=new ${compileErr.constructor.name}('${compileErr.message.replace(/'/g, '\\\'')}');err.stack=\`@${userScriptURL}:${compileErr.lineNumber}:${compileErr.columnNumber}\`;console.error(err);/*` : '') + this.prepareMeta(script[target])});
 
     if (script.style[0]) {
       // --- UserStyle Multi-segment Process
