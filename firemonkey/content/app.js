@@ -8,6 +8,7 @@ let pref = {
   counter: true,
   customOptionsCSS: '',
   customPopupCSS: '',
+  dontMixPopup: false,
   globalScriptExcludeMatches: '',
   sync: false,
   template: {css: '', js: ''}
