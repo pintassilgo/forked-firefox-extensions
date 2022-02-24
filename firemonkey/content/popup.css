@@ -168,12 +168,27 @@ ul {
   padding: 0.1em;
   margin: 0;
   overflow-y: auto;
-  height: 12em;
   scrollbar-color: var(--scrollbar);
   scrollbar-width: thin;
+  display: flex;
+  flex-direction: column;
 }
 
-ul.other {
+.main:not(.no-mix) ul {
+  height: 10em;
+}
+
+.main.no-mix h3.by-match-tab,
+.main:not(.no-mix) h3.by-type {
+  display: none;
+}
+
+.main.no-mix li:not(.tab) {
+  font-style: italic;
+}
+
+.main.no-mix ul.first-group,
+ul.second-group {
   flex-grow: 1;
 }
 
