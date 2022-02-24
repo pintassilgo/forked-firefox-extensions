@@ -188,6 +188,15 @@
       return api.prepare(response);
     },
 
+    async getValues(keys) {
+      const obj = await browser.runtime.sendMessage({
+        name,
+        api: 'getValues',
+        data: keys
+      });
+      return script.export(obj);
+    },
+
     async listValues() {
       const response = await browser.runtime.sendMessage({
         name,
@@ -206,12 +215,34 @@
       });
     },
 
+    setValues(obj) {
+      for (let key in obj) {
+        cache[key] = obj[key];
+      }
+      return browser.runtime.sendMessage({
+        name,
+        api: 'setValues',
+        data: obj
+      });
+    },
+
     deleteValue(key) {
       delete cache[key];
       return browser.runtime.sendMessage({
         name,
         api: 'deleteValue',
         data: {key}
+      });
+    },
+
+    deleteValues(keys) {
+      keys.forEach(key => {
+        delete cache[key];
+      })
+      return browser.runtime.sendMessage({
+        name,
+        api: 'deleteValues',
+        data: keys
       });
     },
 
