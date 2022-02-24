@@ -12,8 +12,8 @@ class Popup {
 
     // ----- Scripts
     this.liTemplate = document.querySelector('template').content.firstElementChild;
-    this.ulTab = document.querySelector('ul.tab');
-    this.ulOther = document.querySelector('ul.other');
+    this.firstGroup = document.querySelector('ul.first-group');
+    this.secondGroup = document.querySelector('ul.second-group');
 
     // ----- Info
     this.info = document.querySelector('section.info');
@@ -86,6 +86,8 @@ class Popup {
   }
 
   async process() {
+    pref.dontMixPopup && document.querySelector('.main').classList.add('no-mix');
+
     const tabs = await browser.tabs.query({currentWindow: true, active: true});
     const tabId = tabs[0].id;                                 // active tab id
     this.url = tabs[0].url;                                   // used in find scripts
@@ -93,10 +95,11 @@ class Popup {
     const [Tab, Other, frames] = await CheckMatches.process(tabs[0]);
     document.querySelector('h3 span.frame').textContent = frames; // display frame count
 
-    Tab.forEach(item => this.docfrag.appendChild(this.addScript(pref[item])));
-    this.ulTab.appendChild(this.docfrag);
-    Other.forEach(item => this.docfrag.appendChild(this.addScript(pref[item])));
-    this.ulOther.appendChild(this.docfrag);
+    this.docfrag2 = document.createDocumentFragment();
+    Tab.forEach(item => this.addScript(pref[item], true));
+    Other.forEach(item => this.addScript(pref[item], false));
+    this.firstGroup.appendChild(this.docfrag);
+    this.secondGroup.appendChild(this.docfrag2);
 
     // --- check commands if there are active scripts in tab & has registerMenuCommand v2.45
     if(Tab.some(item => pref[item].enabled &&
@@ -107,9 +110,10 @@ class Popup {
     }
   }
 
-  addScript(item) {
+  addScript(item, matchTab) {
     const li = this.liTemplate.cloneNode(true);
     li.classList.add(item.js ? 'js' : 'css');
+    matchTab && li.classList.add('tab');
     item.enabled || li.classList.add('disabled');
     li.children[1].textContent = item.name;
     li.id = '_' + item.name;
@@ -121,7 +125,14 @@ class Popup {
 
     li.children[0].addEventListener('click', this.toggleState);
     li.children[1].addEventListener('click', e => this.showInfo(e));
-    return li;
+
+    if (pref.dontMixPopup) {
+      if (item.js) { this.docfrag.appendChild(li); }
+      else { this.docfrag2.appendChild(li); }
+    } else {
+      if (matchTab) { this.docfrag.appendChild(li); }
+      else { this.docfrag2.appendChild(li); }      
+    }
   }
 
   toggleState() {
