@@ -354,9 +354,13 @@ class ScriptRegister {
     const js = target === 'js';
     const page = js && script.injectInto === 'page';
     const pageURL = page ? '%20(page-context)' : '';
-    const encodeId = encodeURI(name);
-    const sourceURL = `\n\n//# sourceURL=user-script:FireMonkey/${encodeId}${pageURL}/`;
+    const encodeId = encodeURI(name).replace(/\//g, '%2F');
+    const baseURL = `user-script:FireMonkey/${encodeId}${pageURL}/`;
+    const baseSourceURL = `/**/\n//# sourceURL=${baseURL}`;
+    const userScriptURL = `${baseURL}${encodeId}.user.js`;
+    const sourceURL = `${baseSourceURL}${encodeId}.user.js`;
     options[target] = [];
+    let compileErr;
 
     // --- contextual identity container
     script.container?.[0] && this.containerSupport[target] &&
@@ -383,7 +387,7 @@ class ScriptRegister {
         }
         else if (pref[id]?.js) {                            // same type only
           let code = Meta.prepare(pref[id].js);
-          code += sourceURL + encodeURI(item) + '.user.js';
+          code += baseSourceURL + encodeURI(item) + '.user.js';
           page && (code = `GM.addScript(${JSON.stringify(code)})`);
           options.js.push({code});
         }
@@ -402,7 +406,7 @@ class ScriptRegister {
           .then(response => response.text())
           .then(code => {
             url.startsWith('/lib/') && (url = url.slice(1, -1));
-            code += sourceURL + encodeURI(url);
+            code += baseSourceURL + encodeURI(url);
             page && (code = `GM.addScript(${JSON.stringify(code)})`);
             options[target].push({code});
           })
@@ -457,7 +461,15 @@ class ScriptRegister {
       };
 
       // --- add debug
-      script.js += sourceURL + encodeId + '.user.js';
+      try{
+        eval(`()=>{${script.js}\n}`);
+      } catch (e) {
+        compileErr = e;
+        let escapeComments = script.js.split('// ==/UserScript==');
+        escapeComments[1] = escapeComments[1].replace(/\/\*|\*\//g, '*//*');
+        script.js = escapeComments.join('// ==/UserScript==');
+      }
+      script.js = `try{${script.js}\n/**/}catch(e){console.error(e)}${sourceURL}`;
 
       // --- process inject-into page context
       if (page) {
@@ -478,7 +490,7 @@ class ScriptRegister {
     }
 
     // --- add code
-    options[target].push({code: Meta.prepare(script[target])});
+    options[target].push({code: (compileErr ? `const err=new ${compileErr.constructor.name}('${compileErr.message.replace(/'/g, '\\\'')}');err.stack=\`@${userScriptURL}:${compileErr.lineNumber}:${compileErr.columnNumber}\`;console.error(err);/*` : '') + Meta.prepare(script[target])});
 
     if (script.style[0]) {
       // --- UserStyle Multi-segment Process
