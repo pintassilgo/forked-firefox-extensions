@@ -97,7 +97,7 @@ class Options {
     }
   }
 }
-const options = new Options(['autoUpdateInterval', 'globalScriptExcludeMatches', 'sync',
+const options = new Options(['autoUpdateInterval', 'dontMixPopup', 'globalScriptExcludeMatches', 'sync',
   'counter', 'customOptionsCSS', 'customPopupCSS', 'cmOptions']);
 // ----------------- /Options ------------------------------
 
