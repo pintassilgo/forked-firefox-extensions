@@ -177,6 +177,15 @@ browser.userScripts.onBeforeScript.addListener(script => {
       return api.prepare(response);
     },
 
+    async getValues(keys) {
+      const obj = await browser.runtime.sendMessage({
+        name,
+        api: 'getValues',
+        data: keys
+      });
+      return script.export(obj);
+    },
+
     async listValues() {
       const response = await browser.runtime.sendMessage({
         name,
@@ -195,12 +204,34 @@ browser.userScripts.onBeforeScript.addListener(script => {
       });
     },
 
+    setValues(obj) {
+      for (let key in obj) {
+        storage[key] = obj[key];
+      }
+      return browser.runtime.sendMessage({
+        name,
+        api: 'setValues',
+        data: obj
+      });
+    },
+
     deleteValue(key) {
       delete storage[key];
       return browser.runtime.sendMessage({
         name,
         api: 'deleteValue',
         data: {key}
+      });
+    },
+
+    deleteValues(keys) {
+      keys.forEach(key => {
+        delete storage[key];
+      })
+      return browser.runtime.sendMessage({
+        name,
+        api: 'deleteValues',
+        data: keys
       });
     },
 
