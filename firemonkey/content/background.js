@@ -396,6 +396,11 @@ class ScriptRegister {
 
     // ----- script only
     else if (js) {
+      // --- unsafeWindow implementation & Regex include/exclude workaround
+      // Mapping to window object as a temporary workaround for
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1715249
+      !page && options.js.push({file: '/content/api-plus.js'});
+
       // --- add @require
       require.forEach(item => {
         const id = `_${item}`;
@@ -514,11 +519,6 @@ class ScriptRegister {
         //script.js = `(async() => {await storageGet(); ${script.js}\n})();`;
         script.js = `storageGet().then(() => { ${script.js}\n});`;
       }
-
-      // --- unsafeWindow implementation & Regex include/exclude workaround
-      // Mapping to window object as a temporary workaround for
-      // https://bugzilla.mozilla.org/show_bug.cgi?id=1715249
-      !page && options.js.push({file: '/content/api-plus.js'});
 
       // --- unsafeWindow implementation & Regex include/exclude workaround
       (includes[0] || excludes[0]) && options.js.push({code: `if (!matchURL()) { throw ''; }`});
