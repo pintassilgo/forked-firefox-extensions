@@ -826,7 +826,7 @@ class API {
   }
 
   onBeforeSendHeaders(e) {
-    if(!e.originUrl || !e.originUrl.startsWith(this.FMUrl)) { return; } // not from FireMonkey
+    if(e.tabId !== -1 && !e.originUrl?.startsWith(this.FMUrl)) { return; } // not from FireMonkey
 
     const cookies = [];
     const idx = [];
@@ -855,11 +855,11 @@ class API {
     return {requestHeaders: e.requestHeaders};
   }
 
-  process(message, sender) {
+  async process(message, sender) {
     const {name, api, data: e, id = `_${name}`} = message;
     if (!api) { return; }
     // only set if in container/incognito
-    const storeId = sender.tab.cookieStoreId !== 'firefox-default' && sender.tab.cookieStoreId;
+    const storeId = sender.tab.cookieStoreId;
 
     switch (api) {
       // --- internal use only (not GM API)
@@ -968,7 +968,8 @@ class API {
         return this.fetch(e, storeId, name);
 
       case 'xmlHttpRequest':
-        return this.xmlHttpRequest(e, storeId);
+        await this.addCookie(e.url, e.headers, storeId);
+        return e.headers;
     }
   }
 
@@ -1013,52 +1014,6 @@ class API {
         }
       })
       .catch(error => App.log(name, `fetch ${e.url} ➜ ${error.message}`, 'error'));
-  }
-
-  async xmlHttpRequest(e, storeId) {
-    if (!e.mozAnon && storeId) {                            // not anonymous AND in container/incognito
-      e.mozAnon = true;
-      await this.addCookie(e.url, e.headers, storeId);
-    }
-    Object.keys(e.headers)[0] || delete e.headers;          // clean up
-
-    return new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest({mozAnon: e.mozAnon});
-      xhr.open(e.method, e.url, true, e.user, e.password);
-      e.overrideMimeType && xhr.overrideMimeType(e.overrideMimeType);
-      xhr.responseType = e.responseType;
-      e.timeout && (xhr.timeout = e.timeout);
-      e.hasOwnProperty('withCredentials') && (xhr.withCredentials = e.withCredentials);
-      e.headers && Object.keys(e.headers).forEach(item => xhr.setRequestHeader(item, e.headers[item]));
-      xhr.send(e.data);
-
-      xhr.onload =      () => resolve(this.makeResponse(xhr, 'onload'));
-      xhr.onerror =     () => resolve(this.makeResponse(xhr, 'onerror'));
-      xhr.ontimeout =   () => resolve(this.makeResponse(xhr, 'ontimeout'));
-      xhr.onabort =     () => resolve(this.makeResponse(xhr, 'onabort'));
-      xhr.onprogress =  () => {};
-    });
-  }
-
-  makeResponse(xhr, type) {
-    return {
-      type,
-      readyState:       xhr.readyState,
-      response:         xhr.response,
-      responseHeaders:  xhr.getAllResponseHeaders(),
-      // responseText is only available if responseType is '' or 'text'.
-      responseText:     ['', 'text'].includes(xhr.responseType) ? xhr.responseText : null,
-      responseType:     xhr.responseType,
-      responseURL:      xhr.responseURL,
-      // responseXML is only available if responseType is '' or 'document'.
-      // cant pass XMLDocument ➜ Error: An unexpected apiScript error occurred
-      responseXML:      ['', 'document'].includes(xhr.responseType) ? xhr.responseText : null,
-      status:           xhr.status,
-      statusText:       xhr.statusText,
-      timeout:          xhr.timeout,
-      withCredentials:  xhr.withCredentials,
-      finalUrl:         xhr.responseURL
-    };
   }
 }
 new API();

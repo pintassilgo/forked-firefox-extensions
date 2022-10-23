@@ -127,7 +127,7 @@ browser.userScripts.onBeforeScript.addListener(script => {
     }
 
     // --- prepare request headers
-    async prepareInit(url, init) {
+    async prepareInit(init) {
       // --- remove forbidden headers (Attempt to set a forbidden header was denied: Referer), allow specialHeader
       const specialHeader = ['cookie', 'host', 'origin', 'referer'];
       const forbiddenHeader = ['accept-charset', 'accept-encoding', 'access-control-request-headers',
@@ -147,19 +147,6 @@ browser.userScripts.onBeforeScript.addListener(script => {
       });
 
       delete init.anonymous;                                // clean up
-    }
-
-    // --------------- xmlHttpRequest callback ---------------
-    /*
-      Ref: robwu (Rob Wu)
-      In order to make callback functions visible
-      ONLY for GM.xmlHttpRequest(GM_xmlhttpRequest)
-    */
-    callUserScriptCallback(object, name, ...args) {
-      try {
-        const cb = object.wrappedJSObject[name];
-        typeof cb === 'function' && cb(...args);
-      } catch(error) { api.log(`callUserScriptCallback ➜ ${error.message}`, 'error'); }
     }
   }
   const api = new API();
@@ -296,7 +283,7 @@ browser.userScripts.onBeforeScript.addListener(script => {
       // exclude credentials in request, ignore credentials sent back in response (e.g. Set-Cookie header)
       init.anonymous && (data.init.credentials = 'omit');
 
-      await api.prepareInit(url, data.init);
+      await api.prepareInit(data.init);
 
       const response = await browser.runtime.sendMessage({
         name,
@@ -307,44 +294,69 @@ browser.userScripts.onBeforeScript.addListener(script => {
       return response ? cloneInto(response, window) : null;
     },
 
-    async xmlHttpRequest(init = {}) {
-      // --- check url
-      const url = init.url && api.checkURL(init.url);
-      if (!url) { return Promise.reject(); }
-
-      const data = {
-        method: 'GET',
+    async xmlHttpRequest({wrappedJSObject: {
+        data,
+        headers = {},
+        onabort,
+        onerror,
+        onload,
+        onloadend,
+        onloadstart,
+        onprogress,
+        onreadystatechange,
+        ontimeout,
+        open,
+        overrideMimeType,
+        send,
         url,
-        data: null,
-        user: null,
-        password: null,
-        responseType: '',
-        headers: {},
-        mozAnon: !!init.anonymous
-      };
-
-      // not processing withCredentials as it has no effect from bg script
-      ['method', 'headers', 'data', 'overrideMimeType', 'user', 'password', 'timeout',
-        'responseType'].forEach(item => init.hasOwnProperty(item) && (data[item] = init[item]));
-
-      await api.prepareInit(url, data);
-
-      const response = await browser.runtime.sendMessage({
-        name,
-        api: 'xmlHttpRequest',
-        data
+        user,
+        password,
+        ...init
+      }} = {}) {
+      return new Promise(async () => {
+        if (!init.anonymous) {
+          headers = await browser.runtime.sendMessage({
+            name,
+            api: 'xmlHttpRequest',
+            data: {headers, url}
+          });
+        }
+        await api.prepareInit({headers});
+        const xhr = new XMLHttpRequest({mozAnon: !!init.anonymous});
+        xhr.open(init.method || 'GET', url, true, user, password);
+        for (let prop in init) {
+          xhr[prop] = init[prop];
+        }
+        headers && Object.keys(headers).forEach(item => xhr.setRequestHeader(item, headers[item]));
+        overrideMimeType && xhr.overrideMimeType(overrideMimeType);
+        const objEvents = {
+          onabort: onabort && (() => onabort(cloneObj(xhr))) || null,
+          onerror: onerror && (() => onerror(cloneObj(xhr))) || null,
+          onload: onload && (() => onload(cloneObj(xhr))) || null,
+          onloadend: onloadend && (() => onloadend(cloneObj(xhr))) || null,
+          onloadstart: onloadstart && (() => onloadstart(cloneObj(xhr))) || null,
+          onprogress: onprogress && (() => onprogress(cloneObj(xhr))) || null,
+          onreadystatechange: onreadystatechange && (() => onreadystatechange(cloneObj(xhr))) || null,
+          ontimeout: ontimeout && (() => ontimeout(cloneObj(xhr))) || null,
+        };
+        Object.assign(xhr, objEvents);
+        const cloneObj = xhr => cloneInto({
+          finalUrl: xhr.responseURL,
+          readyState: xhr.readyState,
+          response: xhr.response,
+          responseHeaders: xhr.getAllResponseHeaders(),
+          responseText: xhr.responseText,
+          responseType: xhr.responseType,
+          responseURL: xhr.responseURL,
+          responseXML: xhr.responseXML && new DOMParser().parseFromString(xhr.responseText, 'application/xml'),
+          status: xhr.status,
+          statusText: xhr.statusText,
+          timeout: xhr.timeout,
+          withCredentials: xhr.withCredentials,
+          ...objEvents
+        }, window, {cloneFunctions: true, wrapReflectors: true});
+        xhr.send(data);
       });
-      if (!response) { throw 'There was an error with the xmlHttpRequest request.'; }
-
-      // only these 4 callback functions are processed
-      // cloneInto() work around for https://bugzilla.mozilla.org/show_bug.cgi?id=1583159
-      const type = response.type;
-      delete response.type;
-      // convert text responseXML to XML DocumentFragment
-      response.responseXML &&
-        (response.responseXML = document.createRange().createContextualFragment(response.responseXML.trim()));
-      api.callUserScriptCallback(init, type,
-         typeof response.response === 'string' ? script.export(response) : cloneInto(response, window));
     },
 
     async getResourceText(resourceName) {
