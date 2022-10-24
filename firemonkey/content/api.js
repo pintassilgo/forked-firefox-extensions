@@ -127,7 +127,7 @@ browser.userScripts.onBeforeScript.addListener(script => {
     }
 
     // --- prepare request headers
-    async prepareInit(init) {
+    prepareInit(init) {
       // --- remove forbidden headers (Attempt to set a forbidden header was denied: Referer), allow specialHeader
       const specialHeader = ['cookie', 'host', 'origin', 'referer'];
       const forbiddenHeader = ['accept-charset', 'accept-encoding', 'access-control-request-headers',
@@ -283,7 +283,7 @@ browser.userScripts.onBeforeScript.addListener(script => {
       // exclude credentials in request, ignore credentials sent back in response (e.g. Set-Cookie header)
       init.anonymous && (data.init.credentials = 'omit');
 
-      await api.prepareInit(data.init);
+      api.prepareInit(data.init);
 
       const response = await browser.runtime.sendMessage({
         name,
@@ -313,49 +313,68 @@ browser.userScripts.onBeforeScript.addListener(script => {
         password,
         ...init
       }} = {}) {
-      return new Promise(async () => {
-        if (!init.anonymous) {
-          headers = await browser.runtime.sendMessage({
-            name,
-            api: 'xmlHttpRequest',
-            data: {headers, url}
-          });
-        }
-        await api.prepareInit({headers});
-        const xhr = new XMLHttpRequest({mozAnon: !!init.anonymous});
-        xhr.open(init.method || 'GET', url, true, user, password);
-        for (let prop in init) {
-          xhr[prop] = init[prop];
-        }
-        headers && Object.keys(headers).forEach(item => xhr.setRequestHeader(item, headers[item]));
-        overrideMimeType && xhr.overrideMimeType(overrideMimeType);
-        const objEvents = {
-          onabort: onabort && (() => onabort(cloneObj(xhr))) || null,
-          onerror: onerror && (() => onerror(cloneObj(xhr))) || null,
-          onload: onload && (() => onload(cloneObj(xhr))) || null,
-          onloadend: onloadend && (() => onloadend(cloneObj(xhr))) || null,
-          onloadstart: onloadstart && (() => onloadstart(cloneObj(xhr))) || null,
-          onprogress: onprogress && (() => onprogress(cloneObj(xhr))) || null,
-          onreadystatechange: onreadystatechange && (() => onreadystatechange(cloneObj(xhr))) || null,
-          ontimeout: ontimeout && (() => ontimeout(cloneObj(xhr))) || null,
-        };
-        Object.assign(xhr, objEvents);
-        const cloneObj = xhr => cloneInto({
-          finalUrl: xhr.responseURL,
-          readyState: xhr.readyState,
-          response: xhr.response,
-          responseHeaders: xhr.getAllResponseHeaders(),
-          responseText: xhr.responseText,
-          responseType: xhr.responseType,
-          responseURL: xhr.responseURL,
-          responseXML: xhr.responseXML && new DOMParser().parseFromString(xhr.responseText, 'application/xml'),
-          status: xhr.status,
-          statusText: xhr.statusText,
-          timeout: xhr.timeout,
-          withCredentials: xhr.withCredentials,
-          ...objEvents
-        }, window, {cloneFunctions: true, wrapReflectors: true});
-        xhr.send(data);
+      if (!init.anonymous) {
+        headers = await browser.runtime.sendMessage({
+          name,
+          api: 'xmlHttpRequest',
+          data: {headers, url}
+        });
+      }
+      api.prepareInit({headers});
+      const xhr = new XMLHttpRequest({mozAnon: !!init.anonymous});
+      xhr.open(init.method || 'GET', url, true, user, password);
+      for (let prop in init) {
+        xhr[prop] = init[prop];
+      }
+      headers && Object.keys(headers).forEach(item => xhr.setRequestHeader(item, headers[item]));
+      overrideMimeType && xhr.overrideMimeType(overrideMimeType);
+      const xhrEvents = {
+        onabort: onabort && (() => onabort(cloneObj(xhr))) || null,
+        onerror: onerror && (() => onerror(cloneObj(xhr))) || null,
+        onload: onload && (() => onload(cloneObj(xhr))) || null,
+        onloadend: onloadend && (() => onloadend(cloneObj(xhr))) || null,
+        onloadstart: onloadstart && (() => onloadstart(cloneObj(xhr))) || null,
+        onprogress: onprogress && (() => onprogress(cloneObj(xhr))) || null,
+        onreadystatechange: onreadystatechange && (() => onreadystatechange(cloneObj(xhr))) || null,
+        ontimeout: ontimeout && (() => ontimeout(cloneObj(xhr))) || null,
+      };
+      let xhrFunctions = {
+        ...xhrEvents,
+        abort: xhr.abort.bind(xhr),
+        addEventListener: xhr.addEventListener.bind(xhr),
+        getAllResponseHeaders: xhr.getAllResponseHeaders.bind(xhr),
+        getResponseHeader: xhr.getResponseHeader.bind(xhr),
+        open: xhr.open.bind(xhr),
+        overrideMimeType: xhr.overrideMimeType.bind(xhr),
+        send: xhr.send.bind(xhr),
+        setRequestHeader: xhr.setRequestHeader.bind(xhr),
+        upload: {addEventListener: xhr.upload.addEventListener.bind(xhr.upload)},
+      }
+      Object.assign(xhr, xhrEvents);
+      const cloneObj = xhr => script.export({
+        // GM exclusive
+        finalUrl: xhr.responseURL,
+
+        // natives
+        mozAnon: xhr.mozAnon,
+        mozSystem: xhr.mozSystem,
+        readyState: xhr.readyState,
+        response: xhr.response,
+        responseText: xhr.responseText,
+        responseType: xhr.responseType,
+        responseURL: xhr.responseURL,
+        responseXML: xhr.responseXML && new DOMParser().parseFromString(xhr.responseText, 'application/xml'),
+        status: xhr.status,
+        statusText: xhr.statusText,
+        timeout: xhr.timeout,
+        withCredentials: xhr.withCredentials,
+        responseHeaders: xhr.getAllResponseHeaders.call(xhr),
+        ...xhrFunctions,
+      });
+      xhr.send(data);
+      return script.export({
+        ...cloneObj(xhr),
+        ...xhrFunctions,
       });
     },
 
