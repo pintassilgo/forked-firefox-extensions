@@ -59,7 +59,7 @@
             }                   }
 
     space_after_anon_function (default false) - should the space before an anonymous function's parens be added, "function()" vs "function ()",
-          NOTE: This option is overriden by jslint_happy (i.e. if jslint_happy is true, space_after_anon_function is true by design)
+          NOTE: This option is overridden by jslint_happy (i.e. if jslint_happy is true, space_after_anon_function is true by design)
 
     brace_style (default "collapse") - "collapse" | "expand" | "end-expand" | "none" | any of the former + ",preserve-inline"
             put braces on the same line as control statements (default), or put braces on own line (Allman / ANSI style), or just put end braces on own line, or attempt to keep them where they are.
@@ -330,6 +330,7 @@ Beautifier.prototype.create_flags = function(flags_base, mode) {
     inline_frame: false,
     if_block: false,
     else_block: false,
+    class_start_block: false, // class A { INSIDE HERE } or class B extends C { INSIDE HERE }
     do_block: false,
     do_while: false,
     import_block: false,
@@ -742,6 +743,8 @@ Beautifier.prototype.handle_start_expr = function(current_token) {
             (peek_back_two.text === '*' && (peek_back_three.text === '{' || peek_back_three.text === ','))) {
             this._output.space_before_token = true;
           }
+        } else if (this._flags.parent && this._flags.parent.class_start_block) {
+          this._output.space_before_token = true;
         }
       }
     } else {
@@ -856,6 +859,12 @@ Beautifier.prototype.handle_start_block = function(current_token) {
     this.set_mode(MODE.BlockStatement);
   }
 
+  if (this._flags.last_token) {
+    if (reserved_array(this._flags.last_token.previous, ['class', 'extends'])) {
+      this._flags.class_start_block = true;
+    }
+  }
+
   var empty_braces = !next_token.comments_before && next_token.text === '}';
   var empty_anonymous_function = empty_braces && this._flags.last_word === 'function' &&
     this._flags.last_token.type === TOKEN.END_EXPR;
@@ -901,7 +910,7 @@ Beautifier.prototype.handle_start_block = function(current_token) {
       }
     }
     if (this._flags.last_token.type !== TOKEN.OPERATOR && this._flags.last_token.type !== TOKEN.START_EXPR) {
-      if (this._flags.last_token.type === TOKEN.START_BLOCK && !this._flags.inline_frame) {
+      if (in_array(this._flags.last_token.type, [TOKEN.START_BLOCK, TOKEN.SEMICOLON]) && !this._flags.inline_frame) {
         this.print_newline();
       } else {
         this._output.space_before_token = true;
@@ -1296,13 +1305,6 @@ Beautifier.prototype.handle_operator = function(current_token) {
     this.handle_whitespace_and_comments(current_token, preserve_statement_flags);
   }
 
-  if (reserved_array(this._flags.last_token, special_words)) {
-    // "return" had a special handling in TK_WORD. Now we need to return the favor
-    this._output.space_before_token = true;
-    this.print_token(current_token);
-    return;
-  }
-
   // hack for actionscript's import .*;
   if (current_token.text === '*' && this._flags.last_token.type === TOKEN.DOT) {
     this.print_token(current_token);
@@ -1430,7 +1432,11 @@ Beautifier.prototype.handle_operator = function(current_token) {
     // http://www.ecma-international.org/ecma-262/5.1/#sec-7.9.1
     // if there is a newline between -- or ++ and anything else we should preserve it.
     if (current_token.newlines && (current_token.text === '--' || current_token.text === '++' || current_token.text === '~')) {
-      this.print_newline(false, true);
+      var new_line_needed = reserved_array(this._flags.last_token, special_words) && current_token.newlines;
+      if (new_line_needed && (this._previous_flags.if_block || this._previous_flags.else_block)) {
+        this.restore_mode();
+      }
+      this.print_newline(new_line_needed, true);
     }
 
     if (this._flags.last_token.text === ';' && is_expression(this._flags.mode)) {
@@ -1568,6 +1574,10 @@ Beautifier.prototype.handle_dot = function(current_token) {
     // The conditional starts the statement if appropriate.
   } else {
     this.handle_whitespace_and_comments(current_token, true);
+  }
+
+  if (this._flags.last_token.text.match('^[0-9]+$')) {
+    this._output.space_before_token = true;
   }
 
   if (reserved_array(this._flags.last_token, special_words)) {
@@ -2554,7 +2564,7 @@ var punct_pattern = new RegExp(punct);
 
 // words which should always start on new line.
 var line_starters = 'continue,try,throw,return,var,let,const,if,switch,case,default,for,while,break,function,import,export'.split(',');
-var reserved_words = line_starters.concat(['do', 'in', 'of', 'else', 'get', 'set', 'new', 'catch', 'finally', 'typeof', 'yield', 'async', 'await', 'from', 'as']);
+var reserved_words = line_starters.concat(['do', 'in', 'of', 'else', 'get', 'set', 'new', 'catch', 'finally', 'typeof', 'yield', 'async', 'await', 'from', 'as', 'class', 'extends']);
 var reserved_word_pattern = new RegExp('^(?:' + reserved_words.join('|') + ')$');
 
 // var template_pattern = /(?:(?:<\?php|<\?=)[\s\S]*?\?>)|(?:<%[\s\S]*?%>)/g;
@@ -2626,6 +2636,7 @@ Tokenizer.prototype._get_next_token = function(previous_token, open_token) { // 
 
   token = token || this._read_non_javascript(c);
   token = token || this._read_string(c);
+  token = token || this._read_pair(c, this._input.peek(1)); // Issue #2062 hack for record type '#{'
   token = token || this._read_word(previous_token);
   token = token || this._read_singles(c);
   token = token || this._read_comment(c);
@@ -2645,7 +2656,8 @@ Tokenizer.prototype._read_word = function(previous_token) {
     if (!(previous_token.type === TOKEN.DOT ||
         (previous_token.type === TOKEN.RESERVED && (previous_token.text === 'set' || previous_token.text === 'get'))) &&
       reserved_word_pattern.test(resulting_string)) {
-      if (resulting_string === 'in' || resulting_string === 'of') { // hack for 'in' and 'of' operators
+      if ((resulting_string === 'in' || resulting_string === 'of') &&
+        (previous_token.type === TOKEN.WORD || previous_token.type === TOKEN.STRING)) { // hack for 'in' and 'of' operators
         return this._create_token(TOKEN.OPERATOR, resulting_string);
       }
       return this._create_token(TOKEN.RESERVED, resulting_string);
@@ -2678,6 +2690,19 @@ Tokenizer.prototype._read_singles = function(c) {
   }
 
   if (token) {
+    this._input.next();
+  }
+  return token;
+};
+
+Tokenizer.prototype._read_pair = function(c, d) {
+  var token = null;
+  if (c === '#' && d === '{') {
+    token = this._create_token(TOKEN.START_BLOCK, c + d);
+  }
+
+  if (token) {
+    this._input.next();
     this._input.next();
   }
   return token;

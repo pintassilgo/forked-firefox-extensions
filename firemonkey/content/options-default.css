@@ -1,5 +1,6 @@
 /* ----- Dark Theme ----- */
-:root, body.dark {
+:root,
+body.dark {
   --shadow: #fff8;
   --selected-bg: #555;
   --btn-hover: #444;
@@ -22,7 +23,6 @@
   --nav-height: 2.5rem;
 }
 
-
 /* ----- General ----- */
 body {
   opacity: 0;
@@ -35,7 +35,7 @@ nav label img {
 }
 
 article {
-  background-color: var(--option-bg);
+  background-color: var(--alt-bg);
 }
 
 /* About & Help */
@@ -131,7 +131,6 @@ td {
   padding: 0.4em 1em;
   font-size: 0.9em;
   transition: 0.5s;
-  cursor: pointer;
   text-align: center;
 }
 
@@ -161,7 +160,8 @@ nav {
   background: var(--bg);
   padding: 0 0.2em;
   border-bottom: 1px solid var(--border);
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, max-content);
 }
 
 nav > label {
@@ -179,7 +179,7 @@ nav > label:hover {
 }
 
 nav > label img {
-  width: 1em;
+  width: 1.1em;
 }
 
 nav label a {
@@ -211,13 +211,13 @@ nav label a:hover {
 #nav7:checked ~ nav label[for="nav7"],
 #nav8:checked ~ nav label[for="nav8"] {
   background-color: var(--selected-bg);
-  border-bottom-color: #f84;
+  border-bottom-color: var(--highlight);
   opacity: 1;
 }
 
 @keyframes sect {
-    0%  { opacity: 0; }
-  100%  { opacity: 1; }
+    0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 /* ----- /Navigation ----- */
 
@@ -226,7 +226,8 @@ input[type="file"] {
   display: none;
 }
 
-label[data-i18n^="import"] {
+label[data-i18n^="import"],
+button[data-i18n^="import"] {
   border-top-color: #6a4;
 }
 
@@ -234,13 +235,14 @@ button[data-i18n^="export"] {
   border-top-color: #d24;
 }
 
-label[data-i18n^="import"]::before {
-  content: '\1f4e5';
+label[data-i18n^="import"]::before,
+button[data-i18n^="import"]::before {
+  content: '📥';
   margin-right: 0.3em;
 }
 
 button[data-i18n^="export"]::before {
-  content: '\1f4e4';
+  content: '📤';
   margin-right: 0.3em;
 }
 /* ----- /Import/Export ----- */
@@ -269,27 +271,3 @@ button[type="submit"]:active::before {
   top: -0.8em;
 }
 /* ----- /Submit Button ----- */
-
-/* ----- Progress Bar ----- */
-.progressBar {
-  opacity: 0;
-  height: 2px;
-  width: 0;
-  background: #3bb3e0 linear-gradient(124deg, #ff2400, #e81d1d, #e8b71d, #e3e81d, #1de840, #1ddde8, #2b1de8, #dd00f3, #dd00f3);
-  background-size: 900% 900%;
-  transition: opacity 1s ease-in-out, width 0s ease-in-out 1s;
-  animation: rainbow 3s ease infinite;
-}
-
-.progressBar.on {
-  width: 100%;
-  opacity: 1;
-  transition: opacity 1s ease-in-out, width 2s ease-in-out;
-}
-
-@keyframes rainbow {
-    0%  { background-position: 0% 100%; }
-   50%  { background-position: 100% 200%; }
-  100%  { background-position: 0% 100%; }
-}
-/* ----- /Progress Bar ----- */
