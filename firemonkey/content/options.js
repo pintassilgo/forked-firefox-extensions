@@ -20,7 +20,7 @@ class Options {
     document.querySelector('button[data-i18n="importFromUrl"]').addEventListener('click', this.importFromUrl);
     document.querySelector('button[type="submit"]').addEventListener('click', () => this.check()); // submit button
 
-    this.init(['autoUpdateInterval', 'cmOptions', 'counter', 'sync',
+    this.init(['autoUpdateInterval', 'cmOptions', 'counter', 'dontMixPopup', 'sync',
       'customOptionsCSS', 'customPopupCSS', 'globalScriptExcludeMatches']);
   }
 

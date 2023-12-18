@@ -14,8 +14,8 @@ class Popup {
   static {
     // --- Scripts
     this.liTemplate = document.querySelector('template').content.firstElementChild;
-    this.ulTab = document.querySelector('ul.tab');
-    this.ulOther = document.querySelector('ul.other');
+    this.firstGroup = document.querySelector('ul.tab');
+    this.secondGroup = document.querySelector('ul.other');
 
     // --- Theme
     document.body.classList.toggle('dark', localStorage.getItem('dark') === 'true'); // defaults to false
@@ -48,6 +48,8 @@ class Popup {
   }
 
   static async process() {
+    pref.dontMixPopup && document.querySelector('.main').classList.add('no-mix');
+
     const tabs = await browser.tabs.query({currentWindow: true, active: true});
     const tabId = tabs[0].id;                               // active tab id
 
@@ -57,16 +59,17 @@ class Popup {
     const [Tab, Other, frames] = await Match.process(tabs[0], pref);
     document.querySelector('h3 span.frame').textContent = frames; // display frame count
 
-    Tab.forEach(item => this.docFrag.appendChild(this.addScript(pref[item])));
-    this.ulTab.appendChild(this.docFrag);
-    Other.forEach(item => this.docFrag.appendChild(this.addScript(pref[item])));
-    this.ulOther.appendChild(this.docFrag);
+    this.docFrag2 = document.createDocumentFragment();
+    Tab.forEach(item => this.addScript(pref[item], true));
+    Other.forEach(item => this.addScript(pref[item], false));
+    this.firstGroup.appendChild(this.docFrag);
+    this.secondGroup.appendChild(this.docFrag2);
 
     // check commands if there are active scripts in tab & has registerMenuCommand FM 2.45
     Info.getMenuCommand(Tab, tabId);
 
     // add click listener if it has children
-    [this.ulTab, this.ulOther].forEach(item =>
+    [this.firstGroup, this.secondGroup].forEach(item =>
       item.children[0] && item.addEventListener('click', e => this.getClick(e)));
   }
 
@@ -86,10 +89,11 @@ class Popup {
     }
   }
 
-  static addScript(item) {
+  static addScript(item, matchTab) {
     const li = this.liTemplate.cloneNode(true);
     li.id = '_' + item.name;
     li.classList.add(item.js ? 'js' : 'css');
+    matchTab && li.classList.add('tab');
     item.enabled || li.classList.add('disabled');
     const sp = li.children;
     sp[1].textContent = item.name;
@@ -98,7 +102,14 @@ class Popup {
       sp[0].textContent = '✘';
       sp[0].style.color = '#f00';
     }
-    return li;
+    
+    if (pref.dontMixPopup) {
+      if (item.js) { this.docFrag.appendChild(li); }
+      else { this.docFrag2.appendChild(li); }
+    } else {
+      if (matchTab) { this.docFrag.appendChild(li); }
+      else { this.docFrag2.appendChild(li); }      
+    }
   }
 
   static toggleState(li) {

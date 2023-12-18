@@ -41,9 +41,8 @@ section {
 }
 
 section.main {
-  display: grid;
-  /* (h3 + ul) x2 + (h3) x3 + div.button */
-  grid-template-rows: repeat(2, auto 1fr) repeat(4, auto);
+  display: flex;
+  flex-direction: column;
 }
 
 h3 {
@@ -412,3 +411,72 @@ img[src*="gear.svg"] {
   filter: var(--img-filter);
 }
 /* ----- /Buttons ----- */
+
+.main.no-mix h3.list span[data-i18n="tabScript"],
+.main.no-mix h3 span[data-i18n="otherScript"] {
+  display: none;
+}
+
+.main.no-mix h3.list:before {
+  content: "Scripts";
+}
+
+.main.no-mix h3:nth-of-type(2):before {
+  content: "CSS";
+}
+
+.main.no-mix ul {
+  display: flex;
+  flex-direction: column;
+}
+
+.main.no-mix ul li.js.tab:not(.disabled) {
+  order: 1;
+}
+
+.main.no-mix ul li.js.disabled.tab {
+  order: 2;
+}
+
+.main.no-mix ul li.js:not(.disabled):not(.tab) {
+  order: 3;
+}
+
+.main.no-mix ul li.js.disabled {
+  order: 4;
+}
+
+.main.no-mix ul li.css.tab:not(.disabled) {
+  order: 5;
+}
+
+.main.no-mix ul li.css.disabled.tab {
+  order: 6;
+}
+
+.main.no-mix ul li.css:not(.disabled):not(.tab) {
+  order: 7;
+}
+
+.main.no-mix ul li.css.disabled {
+  order: 8;
+}
+
+.main.no-mix ul li.tab:has(+ :not(.tab)) {
+    border-bottom: 2px solid lightgray;
+    padding-bottom: 3px;
+    margin-bottom: 4px;
+}
+
+.main.no-mix li:not(.tab) span.name {
+    opacity: 0.5;
+}
+
+.main.no-mix li:not(.tab) {
+  font-style: italic;
+}
+
+ul.tab,
+ul.other {
+  flex-grow: 1;
+}

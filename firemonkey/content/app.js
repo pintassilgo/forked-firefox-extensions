@@ -5,6 +5,7 @@ export let pref = {
   cmOptions: '',
   counter: true,
   customOptionsCSS: '',
+  dontMixPopup: false,
   customPopupCSS: '',
   globalScriptExcludeMatches: '',
   sync: false,
