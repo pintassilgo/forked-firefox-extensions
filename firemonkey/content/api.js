@@ -514,7 +514,7 @@ browser.userScripts.onBeforeScript.addListener(script => {
       delete response.type;
       // convert text responseXML to XML DocumentFragment
       response.responseXML &&
-        (response.responseXML = document.createRange().createContextualFragment(response.responseXML.trim()));
+        (response.responseXML = new DOMParser().parseFromString(response.responseXML, 'application/xml'));
       API.userScriptCallback(init, type,
          typeof response.response === 'string' ? script.export(response) : cloneInto(response, window));
     },

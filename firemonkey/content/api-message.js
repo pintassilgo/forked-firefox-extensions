@@ -184,7 +184,7 @@ export class OnMessage {
       responseURL:      xhr.responseURL,
       // responseXML is only available if responseType is '' or 'document'.
       // cant pass XMLDocument ➜ Error: An unexpected apiScript error occurred
-      responseXML:      ['', 'document'].includes(xhr.responseType) ? xhr.responseText : null,
+      responseXML:      ['', 'document'].includes(xhr.responseType) ? xhr.responseXML && xhr.responseText : null,
       status:           xhr.status,
       statusText:       xhr.statusText,
       timeout:          xhr.timeout,
