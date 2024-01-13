@@ -97,14 +97,15 @@ export class Script {
     const {name, require, requireRemote, userVar = {}, includes, excludes, grant = []} = script;
     const page = script.injectInto === 'page';
     const pageURL = page ? 'inject-into-page/' : '';
-    const encodeName = encodeURI(name);
+    const encodeName = encodeURI(name).replace(/\//g, '%2F');
+    let compileErr;
 
     // re UUID when inject-into page
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1717671
     // Display inconsistency of sourceURL folder & file
     // https://bugzilla.mozilla.org/show_bug.cgi?id=1824910
     // const sourceURL = `\n\n//# sourceURL=user-script:FireMonkey/${pageURL}${encodeName}/`; // before v2.68
-    const sourceURL = `\n\n//# sourceURL=${this.#FMUrl}userscript/${pageURL}${encodeName}`;
+    const sourceURL = `/**/\n//# sourceURL=${this.#FMUrl}userscript/${pageURL}${encodeName}`;
 
     // --- Regex include/exclude workaround
     (includes[0] || excludes[0]) && options.js.push({code: `if (!matchURL()) { throw ''; }`});
@@ -231,7 +232,16 @@ export class Script {
     };
 
     // --- add sourceURL
-    let js = script.js + `${sourceURL}/${encodeName}.user.js`;
+    let js;
+    try{
+      eval(`()=>{${script.js}\n}`);
+    } catch (e) {console.log(e);console.log(script.js)
+      compileErr = e;
+      let escapeComments = script.js.split('// ==/UserScript==');
+      escapeComments[1] = escapeComments[1].replace(/\/\*|\*\//g, '*//*');
+      js = escapeComments.join('// ==/UserScript==');console.log(js);
+    }
+    js = `try{${script.js}\n}catch(e){console.error(e)}${sourceURL}/${encodeName}.user.js`;
 
     // --- process inject-into page context
     if (page) {
@@ -247,7 +257,7 @@ export class Script {
     }
 
     // --- add code
-    options.js.push({code: Meta.prepare(js)});
+    options.js.push({code: (compileErr ? `const err=new ${compileErr.constructor.name}('${compileErr.message.replace(/'/g, '\\\'')}');err.stack=\`@${this.#FMUrl}userscript/${pageURL}${encodeName}.user.js:${compileErr.lineNumber}:${compileErr.columnNumber}\`;console.error(err);/*` : '') + Meta.prepare(js)});
 
     // --- register
     this.#register(pref, id, options);
